@@ -60,7 +60,7 @@ Ve a **Visual Studio 2022 > Herramientas > Administrador de paquetes NuGet > Con
 
 #### Monedas
 
-![Imagen de monedas](https://media.discordapp.net/attachments/1166140795611517018/1166141413663199423/8.png?ex=654968d2&is=6536f3d2&hm=aecf20263ad95110526a8ff00549573da11a9a4ca0b3771bb28deef7aedd7eb2&=&width=811&height=456)
+![Imagen de monedas](https://media.discordapp.net/attachments/1166140795611517018/1166220800320344167/image.png?ex=6549b2c2&is=65373dc2&hm=51b7151a1f7c9aba14d5839838b23f0434418fc0f3ddea97374b5dc0425f7b8c&=&width=855&height=456)
 
 Una vez que ejecutes el proyecto, se abrirá el Swagger, donde podrás probar la API del Casino con sus distintas funcionalidades, que incluyen:
 
