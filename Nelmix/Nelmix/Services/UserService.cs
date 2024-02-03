@@ -109,14 +109,14 @@ namespace Nelmix.Services
         /// Asigna un adulto responsable a un usuario menor.
         /// </summary>
         /// <param name="mailUserMinor">Correo electrónico del usuario menor.</param>
-        /// <param name="nameAdult">Nombre del adulto responsable.</param>
+        /// <param name="mailUserAdult">Correo electrónico del adulto responsable.</param>
         /// <returns>Una tupla que contiene un valor booleano (True si la asignación fue exitosa) y un mensaje de texto.</returns>
-        public (bool, string) AssignAdultResponsible(string mailUserMinor, string nameAdult)
+        public async Task<(bool, string)> AssignAdultResponsible(string mailUserMinor, string mailUserAdult)
         {
             bool register = false;
             string message = "Se ha asignado el adulto correctamente";
 
-            var userMinor = _context.Usuarios.FirstOrDefault(u => u.Email == mailUserMinor);
+            var userMinor = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == mailUserMinor);
 
             if (userMinor == null || userMinor.Edad >= 21)
             {
@@ -124,22 +124,22 @@ namespace Nelmix.Services
                 return (register, message);
             }
 
-            var adult = _context.Usuarios.FirstOrDefault(u => u.Nombre == nameAdult);
+            var adult = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == mailUserAdult);
 
             if (adult == null || adult.Edad < 21)
             {
                 message = "El adulto responsable no existe o es menor de edad.";
                 return (register, message);
-
             }
 
             userMinor.AdultoAsignadoId = adult.UserId;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return (register = true, message);
         }
-        
+
+
         /// <summary>
         /// Cambia el estado de un usuario a inactivo.
         /// </summary>

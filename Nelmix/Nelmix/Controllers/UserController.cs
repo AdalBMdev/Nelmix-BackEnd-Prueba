@@ -98,16 +98,16 @@ namespace Nelmix.Controllers
 
                 if (success)
                 {
-                    return Ok(new { Message = "Contraseña cambiada exitosamente." });
+                    return Ok("Contraseña cambiada exitosamente.");
                 }
                 else
                 {
-                    return BadRequest(new { Message = message });
+                    return BadRequest(message);
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Error interno del servidor: " + ex.Message });
+                return StatusCode(500, "Error interno del servidor: " + ex.Message);
             }
         }
 
@@ -116,14 +116,14 @@ namespace Nelmix.Controllers
         /// Asigna un adulto responsable a un usuario menor.
         /// </summary>
         /// <param name="mailUserMinor">Correo electrónico del usuario menor.  Ejemplo: userMinor@gmail.com</param>
-        /// <param name="nameAdult">Nombre del adulto responsable.  Ejemplo: john</param>
+        /// <param name="mailUserAdult">Correo electrónico del adulto responsable.  Ejemplo: userAdult@gmail.com</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPut("AsignarAdulto")]
-        public IActionResult AsignarAdultoResponsable(string mailUserMinor, string nameAdult)
+        public async Task<IActionResult> AsignarAdultoResponsable(string mailUserMinor, string mailUserAdult)
         {
             try
             {
-                (bool registrado, string mensaje) = usuarioService.AssignAdultResponsible(mailUserMinor, nameAdult);
+                (bool registrado, string mensaje) = await usuarioService.AssignAdultResponsible(mailUserMinor, mailUserAdult);
 
                 if (registrado)
                 {
@@ -134,13 +134,12 @@ namespace Nelmix.Controllers
                     return BadRequest(mensaje);
                 }
             }
-
             catch (Exception ex)
             {
-                return StatusCode(500, "Error interno del servidor: " + ex.Message);
+                return StatusCode(500, "Error interno del servidor: " + ex.Message );
             }
-
         }
+
 
         /// <summary>
         /// Desactiva un usuario.

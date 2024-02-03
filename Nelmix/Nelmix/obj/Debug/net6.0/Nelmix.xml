@@ -182,7 +182,7 @@
             Asigna un adulto responsable a un usuario menor.
             </summary>
             <param name="mailUserMinor">Correo electrónico del usuario menor.  Ejemplo: userMinor@gmail.com</param>
-            <param name="nameAdult">Nombre del adulto responsable.  Ejemplo: john</param>
+            <param name="mailUserAdult">Correo electrónico del adulto responsable.  Ejemplo: userAdult@gmail.com</param>
             <returns>Un ActionResult que indica el resultado de la operación.</returns>
         </member>
         <member name="M:Nelmix.Controllers.UserController.DesactivateUser(System.Int32)">
@@ -660,7 +660,7 @@
             Asigna un adulto responsable a un usuario menor.
             </summary>
             <param name="mailUserMinor">Correo electrónico del usuario menor.</param>
-            <param name="nameAdult">Nombre del adulto responsable.</param>
+            <param name="mailUserAdult">Correo electrónico del adulto responsable.</param>
             <returns>Una tupla que contiene un valor booleano (True si la asignación fue exitosa) y un mensaje de texto.</returns>
         </member>
         <member name="M:Nelmix.Services.UserService.ChangeUserStatusInactive(System.Int32)">
