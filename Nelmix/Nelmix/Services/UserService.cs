@@ -25,35 +25,32 @@ namespace Nelmix.Services
         /// </summary>
         /// <param name="usuario">Objeto Usuario que contiene los datos del usuario a registrar.</param>
         /// <returns>True si el registro fue exitoso, de lo contrario, False.</returns>
-        public bool RegisterUser(Usuario usuario)
+        public async Task<bool> RegisterUser(Usuario usuario)
         {
-            // Convertir la contraseña a su hash SHA-256
-            usuario.Contraseña = ConvertSha256(usuario.Contraseña);
+                usuario.Contraseña = ConvertSha256(usuario.Contraseña);
 
-            // Verificar si el correo es único
-            var existingUser = _context.Usuarios.FirstOrDefault(u => u.Email == usuario.Email);
+                bool emailExists = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
 
-            if (existingUser == null)
-            {
-                var newUser = new Usuario
+                if (!emailExists)
                 {
-                    Nombre = usuario.Nombre,
-                    Edad = usuario.Edad,
-                    Email = usuario.Email,
-                    Contraseña = usuario.Contraseña,
-                    EstadoId = 1,
-                    AdultoAsignadoId = 0
-                };
+                    var newUser = new Usuario
+                    {
+                        Nombre = usuario.Nombre,
+                        Edad = usuario.Edad,
+                        Email = usuario.Email,
+                        Contraseña = usuario.Contraseña,
+                        EstadoId = 1,
+                        AdultoAsignadoId = 0
+                    };
 
-                _context.Usuarios.Add(newUser);
-                _context.SaveChanges();
+                    _context.Usuarios.Add(newUser);
+                    await _context.SaveChangesAsync();
 
-                return true; 
+                    return true;
+                }
+
+                return false;
             }
-
-            else return false; 
-            
-        }
 
         /// <summary>
         /// Inicia sesión de un usuario utilizando su correo electrónico y contraseña.
@@ -78,25 +75,35 @@ namespace Nelmix.Services
         /// <param name="password">Contraseña actual del usuario.</param>
         /// <param name="newPassword">Nueva contraseña que se asignará al usuario.</param>
         /// <returns>True si la contraseña se cambia con éxito, de lo contrario, False.</returns>
-        public bool ChangePassword(string email, string password, string newPassword)
+        public async Task<(bool, string)> ChangePassword(string email, string password, string newPassword)
         {
+            bool success = false;
+            string message = "";
+
             password = ConvertSha256(password);
             newPassword = ConvertSha256(newPassword);
 
-            var user = _context.Usuarios.FirstOrDefault(u => u.Email == email && u.Contraseña == password);
+            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email && u.Contraseña == password);
 
             if (user != null)
             {
+                if (password == newPassword)
+                {
+                    return (success, message = "La contraseña es igual a la anterior");
+                }
+
                 user.Contraseña = newPassword;
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
-                return true; 
+                return (success = true, message);
             }
-
-            else return false; 
-            
+            else
+            {
+                return (success, message = "No se ha podido cambiar la contraseña");
+            }
         }
+
 
         /// <summary>
         /// Asigna un adulto responsable a un usuario menor.

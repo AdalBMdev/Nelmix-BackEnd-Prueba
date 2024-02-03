@@ -29,12 +29,15 @@ namespace Nelmix.Controllers
         /// <param name="oUsuario">Objeto de tipo Usuario que contiene los datos del usuario a registrar.</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Register")]
-        public IActionResult Register(Usuario oUsuario)
+        public async Task<IActionResult> RegisterAsync(Usuario oUsuario)
         {
 
             try
             {
-                if (usuarioService.RegisterUser(oUsuario))
+
+                bool registrationResult = await usuarioService.RegisterUser(oUsuario);
+
+                if (registrationResult)
                 {
                     return Ok("Usuario registrado exitosamente.");
                 }
@@ -87,25 +90,27 @@ namespace Nelmix.Controllers
         /// <param name="newPassword">Nueva contraseña para el usuario. Ejemplo: 1234</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("ChangePassword")]
-        public IActionResult ChangePassword(string email, string password, string newPassword) // Obtiene un objeto tipo CambiarContraseñaRequest
+        public async Task<IActionResult> ChangePassword(string email, string password, string newPassword)
         {
             try
             {
-                if (usuarioService.ChangePassword(email, password, newPassword))
+                (bool success, string message) = await usuarioService.ChangePassword(email, password, newPassword);
+
+                if (success)
                 {
-                    return Ok("Contraseña cambiada exitosamente.");
+                    return Ok(new { Message = "Contraseña cambiada exitosamente." });
                 }
                 else
                 {
-                    return BadRequest("La contraseña actual es incorrecta. Por favor, inténtalo de nuevo.");
+                    return BadRequest(new { Message = message });
                 }
             }
-           
             catch (Exception ex)
             {
-                return StatusCode(500, "Error interno del servidor: " + ex.Message);
+                return StatusCode(500, new { Message = "Error interno del servidor: " + ex.Message });
             }
         }
+
 
         /// <summary>
         /// Asigna un adulto responsable a un usuario menor.

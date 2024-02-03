@@ -153,7 +153,7 @@
             Constructor del controlador UserController.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.UserController.Register(Nelmix.Models.Usuario)">
+        <member name="M:Nelmix.Controllers.UserController.RegisterAsync(Nelmix.Models.Usuario)">
             <summary>
             Registra un nuevo usuario.
             </summary>
