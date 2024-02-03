@@ -58,15 +58,15 @@ namespace Nelmix.Services
         /// <param name="email">Correo electrónico del usuario.</param>
         /// <param name="password">Contraseña del usuario.</param>
         /// <returns>True si la sesión se inicia con éxito, de lo contrario, False.</returns>
-        public bool Login(string email, string password)
+        public async Task<bool> Login(string email, string password)
         {
-
             password = ConvertSha256(password);
 
-            var user = _context.Usuarios.FirstOrDefault(u => u.Email == email && u.Contraseña == password);
+            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email && u.Contraseña == password);
 
-            return user != null; // Si se encuentra el usuario, retorna true; de lo contrario, retorna false
+            return user != null;
         }
+
 
         /// <summary>
         /// Cambia la contraseña de un usuario.

@@ -60,12 +60,13 @@ namespace Nelmix.Controllers
         /// <param name="password">Contraseña del usuario. Ejemplo: 123</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Login")]
-        public IActionResult Login(string email, string password) // Obtiene un objeto tipo UsuarioLogin que contiene email y contraseña
+        public async Task<IActionResult> Login(string email, string password)
         {
-
             try
             {
-                if (usuarioService.Login(email, password))
+                bool loginResult = await usuarioService.Login(email, password);
+
+                if (loginResult)
                 {
                     return Ok("Inicio de sesión exitoso.");
                 }
@@ -74,13 +75,12 @@ namespace Nelmix.Controllers
                     return BadRequest("Correo o contraseña incorrectos. Por favor, inténtalo de nuevo.");
                 }
             }
-
             catch (Exception ex)
             {
-                return StatusCode(500, "Error interno del servidor: " + ex.Message);
+                return StatusCode(500, "Error interno del servidor: " + ex.Message );
             }
-
         }
+
 
         /// <summary>
         /// Cambia la contraseña de un usuario.
