@@ -2,6 +2,8 @@
 using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Nelmix.Context;
 using Nelmix.Models;
 
 namespace Nelmix.Services
@@ -12,7 +14,12 @@ namespace Nelmix.Services
     /// 
     public class UserService
     {
-        
+         private readonly CasinoContext _context;
+
+        public UserService(CasinoContext context)
+        {
+            _context = context;
+        }
         /// <summary>
         /// Registra un nuevo usuario en la base de datos.
         /// </summary>
@@ -20,44 +27,32 @@ namespace Nelmix.Services
         /// <returns>True si el registro fue exitoso, de lo contrario, False.</returns>
         public bool RegisterUser(Usuario usuario)
         {
-            try
-            {
-                var chain = new Connection();
+            // Convertir la contraseña a su hash SHA-256
+            usuario.Contraseña = ConvertSha256(usuario.Contraseña);
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+            // Verificar si el correo es único
+            var existingUser = _context.Usuarios.FirstOrDefault(u => u.Email == usuario.Email);
+
+            if (existingUser == null)
+            {
+                var newUser = new Usuario
                 {
-                    cn.Open();
-                    usuario.Contraseña = ConvertSha256(usuario.Contraseña);
+                    Nombre = usuario.Nombre,
+                    Edad = usuario.Edad,
+                    Email = usuario.Email,
+                    Contraseña = usuario.Contraseña,
+                    EstadoId = 1,
+                    AdultoAsignadoId = 0
+                };
 
-                    SqlCommand cmd = new SqlCommand("sp_RegistrarUsuario", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
+                _context.Usuarios.Add(newUser);
+                _context.SaveChanges();
 
-                    cmd.Parameters.AddWithValue("@nombre", usuario.Nombre);
-                    cmd.Parameters.AddWithValue("@edad", usuario.Edad);
-                    cmd.Parameters.AddWithValue("@email", usuario.Email);
-                    cmd.Parameters.AddWithValue("@contraseña", usuario.Contraseña);
-                    cmd.Parameters.AddWithValue("@estado_id", 1);
-                    cmd.Parameters.AddWithValue("@adulto_asignado_id", 0);
-
-                    SqlParameter Registrado = new SqlParameter("@Registrado", SqlDbType.Bit);
-                    Registrado.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(Registrado);
-
-                    SqlParameter Mensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 100);
-                    Mensaje.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(Mensaje);
-
-
-                    cmd.ExecuteNonQuery();
-
-                    bool register = Convert.ToBoolean(Registrado.Value);
-                    return register;
-                }
+                return true; 
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al registrar el usuario.", ex);
-            }
+
+            else return false; 
+            
         }
 
         /// <summary>
@@ -68,40 +63,12 @@ namespace Nelmix.Services
         /// <returns>True si la sesión se inicia con éxito, de lo contrario, False.</returns>
         public bool Login(string email, string password)
         {
-            try
-            {
-                var chain = new Connection();
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
+            password = ConvertSha256(password);
 
-                    password = ConvertSha256(password);
+            var user = _context.Usuarios.FirstOrDefault(u => u.Email == email && u.Contraseña == password);
 
-                    SqlCommand cmd = new SqlCommand("sp_IniciarSesionUsuario", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@email", email);
-                    cmd.Parameters.AddWithValue("@contraseña", password);
-
-                    SqlParameter UsuarioEncontrado = new SqlParameter("@UsuarioEncontrado", SqlDbType.Bit);
-                    UsuarioEncontrado.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(UsuarioEncontrado);
-
-                    SqlParameter Mensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 100);
-                    Mensaje.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(Mensaje);
-
-                    cmd.ExecuteNonQuery();
-
-                    bool login = Convert.ToBoolean(UsuarioEncontrado.Value);
-                    return login;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al iniciar sesión del usuario.", ex);
-            }
+            return user != null; // Si se encuentra el usuario, retorna true; de lo contrario, retorna false
         }
 
         /// <summary>
@@ -113,42 +80,22 @@ namespace Nelmix.Services
         /// <returns>True si la contraseña se cambia con éxito, de lo contrario, False.</returns>
         public bool ChangePassword(string email, string password, string newPassword)
         {
-            try
+            password = ConvertSha256(password);
+            newPassword = ConvertSha256(newPassword);
+
+            var user = _context.Usuarios.FirstOrDefault(u => u.Email == email && u.Contraseña == password);
+
+            if (user != null)
             {
-                var chain = new Connection();
+                user.Contraseña = newPassword;
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    password = ConvertSha256(password);
-                    newPassword = ConvertSha256(newPassword);
+                _context.SaveChanges();
 
-                    SqlCommand cmd = new SqlCommand("sp_CambiarContraseña", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@email", email);
-                    cmd.Parameters.AddWithValue("@contraseñaActual", password);
-                    cmd.Parameters.AddWithValue("@nuevaContraseña", newPassword);
-
-                    SqlParameter ChangePassword = new SqlParameter("@ContraseñaCambiada", SqlDbType.Bit);
-                    ChangePassword.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(ChangePassword);
-
-
-                    SqlParameter Mensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 100);
-                    Mensaje.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(Mensaje);
-
-                cmd.ExecuteNonQuery();
-
-                    bool changePassword = Convert.ToBoolean(ChangePassword.Value);
-                    return changePassword;
-                }
+                return true; 
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al cambiar la contraseña del usuario.", ex);
-            }
+
+            else return false; 
+            
         }
 
         /// <summary>
@@ -159,43 +106,31 @@ namespace Nelmix.Services
         /// <returns>Una tupla que contiene un valor booleano (True si la asignación fue exitosa) y un mensaje de texto.</returns>
         public (bool, string) AssignAdultResponsible(string mailUserMinor, string nameAdult)
         {
-            try
+            bool register = false;
+            string message = "Se ha asignado el adulto correctamente";
+
+            var userMinor = _context.Usuarios.FirstOrDefault(u => u.Email == mailUserMinor);
+
+            if (userMinor == null || userMinor.Edad >= 21)
             {
-                bool register = false;
-                string message = "";
-
-                var chain = new Connection();
-
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    SqlCommand cmd = new SqlCommand("sp_AsignarAdultoResponsable", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@CorreoUsuarioMenor", mailUserMinor);
-                    cmd.Parameters.AddWithValue("@NombreAdulto", nameAdult);
-
-                    SqlParameter Registrado = new SqlParameter("@Registrado", SqlDbType.Bit);
-                    Registrado.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(Registrado);
-
-                    SqlParameter Mensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 100);
-                    Mensaje.Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add(Mensaje);
-
-                    cn.Open();
-
-                    cmd.ExecuteNonQuery();
-
-                    register = Convert.ToBoolean(Registrado.Value);
-                    message = Mensaje.Value.ToString();
-                }
-
+                message = "El usuario menor no existe o es mayor de edad.";
                 return (register, message);
             }
-            catch (Exception ex)
+
+            var adult = _context.Usuarios.FirstOrDefault(u => u.Nombre == nameAdult);
+
+            if (adult == null || adult.Edad < 21)
             {
-                throw new Exception("Error al asignar adulto responsable.", ex);
+                message = "El adulto responsable no existe o es menor de edad.";
+                return (register, message);
+
             }
+
+            userMinor.AdultoAsignadoId = adult.UserId;
+
+            _context.SaveChanges();
+
+            return (register = true, message);
         }
         
         /// <summary>
@@ -204,24 +139,16 @@ namespace Nelmix.Services
         /// <param name="userId">Identificador del usuario.</param>
         public void ChangeUserStatusInactive(int userId)
         {
-            try
+            var user = _context.Usuarios.FirstOrDefault(u => u.UserId == userId);
+
+            if (user != null)
             {
-                var chain = new Connection();
-
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("CambiarEstadoUsuarioAInactivo", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@usuario_id", userId);
-
-                    cmd.ExecuteNonQuery();
-                }
+                user.EstadoId = 0;
+                _context.SaveChanges();
             }
-            catch (Exception ex)
+            else
             {
-                throw new Exception("Error al cambiar el estado del usuario a inactivo.", ex);
+                throw new Exception("Usuario no encontrado.");
             }
         }
 

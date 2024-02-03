@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nelmix.Context;
 using Nelmix.Models;
 using Nelmix.Services;
 
@@ -11,13 +12,15 @@ namespace Nelmix.Controllers
     public class UserController : Controller
     {
         private readonly UserService usuarioService;
+        private readonly CasinoContext _context;
 
         /// <summary>
         /// Constructor del controlador UserController.
         /// </summary>
-        public UserController()
+        public UserController(CasinoContext context)
         {
-            usuarioService = new UserService();
+            _context = context;
+            usuarioService = new UserService(_context);
         }
 
         /// <summary>

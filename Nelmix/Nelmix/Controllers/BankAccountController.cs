@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nelmix.Context;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
@@ -10,13 +11,15 @@ namespace Nelmix.Controllers
     public class BankAccountController : Controller
     {
         private readonly BankAccountService cuentaBancariaService;
+        private readonly CasinoContext _context;
 
         /// <summary>
         /// Constructor del controlador BankAccountController.
         /// </summary>
-        public BankAccountController()
+        public BankAccountController(CasinoContext context)
         {
-            cuentaBancariaService = new BankAccountService();
+            _context = context;
+            cuentaBancariaService = new BankAccountService(_context);
         }
 
         /// <summary>
@@ -29,8 +32,6 @@ namespace Nelmix.Controllers
         [HttpPost("CrearCuentaBancaria")]
         public IActionResult CreateBankAccount(int userId, int monedaId, decimal saldo)
         {
-
-
             try
             {
                 if (cuentaBancariaService.CreateBankAccount(userId, monedaId, saldo))

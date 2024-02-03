@@ -286,6 +286,8 @@ BEGIN
 END;
 
 
+
+
 ------------------------------------------------Eliminar cuenta bancaria
 
 CREATE PROCEDURE sp_EliminarCuentaBancaria

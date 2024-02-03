@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using Nelmix.Context;
+using Nelmix.Models;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace Nelmix.Services
@@ -8,6 +10,14 @@ namespace Nelmix.Services
     /// </summary>
     public class BankAccountService
     {
+
+        private readonly CasinoContext _context;
+
+        public BankAccountService (CasinoContext context)
+        {
+            _context = context;
+        }
+
         /// <summary>
         /// Crea una nueva cuenta bancaria para un usuario con un saldo inicial y una moneda específica.
         /// </summary>
@@ -17,21 +27,17 @@ namespace Nelmix.Services
         /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
         public bool CreateBankAccount(int userId, int currencyId, decimal balance)
         {
-            var chain = new Connection();
+                var newBankAccount = new CuentasBancaria
+                {
+                    UserId = userId,
+                    MonedaId = currencyId,
+                    Saldo = balance
+                };
 
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-            {
-                SqlCommand cmd = new SqlCommand("sp_CrearCuentaBancaria", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                _context.CuentasBancarias.Add(newBankAccount);
+                _context.SaveChanges();
 
-                cmd.Parameters.AddWithValue("@user_id", userId);
-                cmd.Parameters.AddWithValue("@moneda_id", currencyId);
-                cmd.Parameters.AddWithValue("@saldo", balance);
-
-                cn.Open();
-                cmd.ExecuteNonQuery();
                 return true;
-            }
         }
 
         /// <summary>
@@ -42,21 +48,19 @@ namespace Nelmix.Services
         /// <returns>True si la cuenta bancaria se elimina con éxito, de lo contrario, False.</returns>
         public bool DeleteBankAccount(int cuentaId, int userId)
         {
-            var chain = new Connection();
+            var bankAccountToDelete = _context.CuentasBancarias.FirstOrDefault(account => account.CuentaId == cuentaId && account.UserId == userId);
 
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+            if (bankAccountToDelete != null)
             {
-                SqlCommand cmd = new SqlCommand("sp_EliminarCuentaBancaria", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                _context.CuentasBancarias.Remove(bankAccountToDelete);
+                _context.SaveChanges();
 
-                cmd.Parameters.AddWithValue("@cuenta_id", cuentaId);
-                cmd.Parameters.AddWithValue("@user_id", userId);
-
-                cn.Open();
-                cmd.ExecuteNonQuery();
                 return true;
             }
+
+            else return false;
         }
+
 
         /// <summary>
         /// Agrega saldo a una cuenta bancaria de un usuario en una moneda específica.
@@ -66,27 +70,20 @@ namespace Nelmix.Services
         /// <param name="balance">Saldo a agregar a la cuenta bancaria.</param>
         /// <returns>True si se agrega saldo con éxito, de lo contrario, False.</returns>
         public bool AddBankAccountBalance(int userId, int currencyId, decimal balance)
-        {
-            var chain = new Connection();
+        {           
+            var bankAccountToUpdate = _context.CuentasBancarias.FirstOrDefault(account => account.UserId == userId && account.MonedaId == currencyId);
 
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+            if (bankAccountToUpdate != null)
             {
+                bankAccountToUpdate.Saldo += balance;
+                _context.SaveChanges();
 
-                SqlCommand cmd = new SqlCommand("AñadirSaldoACuentaBancaria", cn);
-
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@usuario_id", userId);
-                cmd.Parameters.AddWithValue("@moneda_id", currencyId);
-                cmd.Parameters.AddWithValue("@monto", balance);
-
-                cn.Open();
-                int rowsAffected = cmd.ExecuteNonQuery();
-
-                return rowsAffected > 0;
-
+                return true;
             }
-           
+
+            else return false;
         }
+
     }
 }
 
