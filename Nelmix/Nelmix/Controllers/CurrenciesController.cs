@@ -59,11 +59,11 @@ namespace Nelmix.Controllers
         /// <param name="quantity">Cantidad de fichas a comprar. Ejemplo: 10</param>
         /// <returns>Un ActionResult que indica si la compra de fichas en dólares se realizó con éxito.</returns>
         [HttpPost("ComprarFichasEnDolares")]
-        public IActionResult BuyChipsInDollars(int userId, int typeFileId, int quantity)
+        public async Task<IActionResult> BuyChipsInDollars(int userId, int typeFileId, int quantity)
         {
             try
             {
-                var resultado = divisasService.BuyChipsInDollars(userId, typeFileId, quantity);
+                var resultado = await divisasService.BuyChipsInDollars(userId, typeFileId, quantity);
 
                 if (resultado == "Compra de fichas exitosa.")
                 {
@@ -76,10 +76,10 @@ namespace Nelmix.Controllers
             }
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al Comprar Fichas En Dolares.");
+                return StatusCode(500, "Se produjo un error en el servidor al Comprar Fichas En Dolares: " + ex.Message);
             }
         }
+
 
         /// <summary>
         /// Realiza el intercambio de fichas por una moneda específica menos dolares.

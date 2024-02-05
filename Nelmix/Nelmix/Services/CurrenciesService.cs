@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Nelmix.Context;
+using Nelmix.Models;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -71,27 +72,61 @@ namespace Nelmix.Services
         /// <param name="typeFileId">Identificador del tipo de ficha.</param>
         /// <param name="quantity">Cantidad de fichas a comprar.</param>
         /// <returns>Un mensaje indicando si la compra de fichas fue exitosa o un mensaje de error.</returns>
-        public string BuyChipsInDollars(int userId, int typeFileId, int quantity)
+        public async Task<string> BuyChipsInDollars(int userId, int typeFileId, int quantity)
         {
-            var chain = new Connection();
-
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+            try
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("ComprarFichasEnDolares", cn);
-                
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add(new SqlParameter("@usuario_id", userId));
-                cmd.Parameters.Add(new SqlParameter("@tipo_ficha_id", typeFileId));
-                cmd.Parameters.Add(new SqlParameter("@cantidad", quantity));
+                var user = await _context.Usuarios.FindAsync(userId);
+                var chipType = await _context.TiposDeFichas.FindAsync(typeFileId);
 
-                cmd.ExecuteNonQuery();
-                return "Compra de fichas exitosa.";
-                
+                if (user != null && chipType != null)
+                {
+                    decimal chipValueInDollars = (decimal)chipType.Valor;
+                    decimal totalCostInDollars = chipValueInDollars * quantity;
+
+                    var userDollarsAccount = await _context.CuentasBancarias
+                        .FirstOrDefaultAsync(account => account.UserId == userId && account.MonedaId == 1);
+
+                    if (userDollarsAccount != null && userDollarsAccount.Saldo >= totalCostInDollars)
+                    {
+                        userDollarsAccount.Saldo -= totalCostInDollars;
+
+                        var chipRecord = await _context.Fichas
+                            .FirstOrDefaultAsync(record => record.UsuarioId == userId && record.TipoFichaId == typeFileId);
+
+                        if (chipRecord != null)
+                        {
+                            chipRecord.CantidadDisponible += quantity;
+                        }
+                        else
+                        {
+                            _context.Fichas.Add(new Ficha
+                            {
+                                TipoFichaId = typeFileId,
+                                CantidadDisponible = quantity,
+                                UsuarioId = userId
+                            });
+                        }
+
+                        await _context.SaveChangesAsync();
+                        return "La compra se ha realizado exitosamente";
+                    }
+                    else
+                    {
+                        return "Saldo insuficiente en dólares para comprar las fichas ";
+                    }
+                }
+                else
+                {
+                    return "Error al comprar fichas en dólares. Usuario o tipo de ficha no encontrados.";
+                }
             }
-
-            return "Error al comprar fichas en dólares.";
+            catch (Exception ex)
+            {
+                return "Error interno del servidor: " + ex.Message;
+            }
         }
+
 
         /// <summary>
         /// Intercambia fichas por una moneda específica para un usuario.
