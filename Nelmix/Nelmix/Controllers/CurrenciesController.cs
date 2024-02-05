@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nelmix.Context;
 using Nelmix.Models;
 using Nelmix.Services;
 
@@ -11,13 +12,15 @@ namespace Nelmix.Controllers
     public class CurrenciesController : Controller
     {
         private readonly CurrenciesService divisasService;
+        private readonly CasinoContext _context;
 
         /// <summary>
         /// Constructor del controlador CurrenciesController.
         /// </summary>
-        public CurrenciesController()
+        public CurrenciesController(CasinoContext context)
         {
-            divisasService = new CurrenciesService();
+            _context = context;
+            divisasService = new CurrenciesService(_context);
         }
 
 
@@ -27,10 +30,11 @@ namespace Nelmix.Controllers
         /// <param name="accountId">Identificador de la cuenta de banco. Ejemplo: 1</param>
         /// <returns>Un ActionResult que indica si la conversión a dólares se realizó con éxito. </returns>
         [HttpPost("convertirMonedaDolares")]
-        public IActionResult ConvertCurrencyDollars(int accountId)
+        public async Task<IActionResult> ConvertCurrencyDollars(int accountId)
         {
-            
-                var result = divisasService.ConvertCurrencyDollars(accountId);
+            try
+            {
+                decimal result = await divisasService.ConvertCurrencyDollars(accountId);
 
                 if (result != 0)
                 {
@@ -40,7 +44,11 @@ namespace Nelmix.Controllers
                 {
                     return BadRequest("No se pudo realizar la conversión a dólares.");
                 }
-            
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Error interno del servidor: " + ex.Message);
+            }
         }
 
         /// <summary>
@@ -100,3 +108,4 @@ namespace Nelmix.Controllers
 
     }
 }
+   

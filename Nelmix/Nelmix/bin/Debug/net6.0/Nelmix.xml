@@ -44,7 +44,7 @@
             Controlador para operaciones relacionadas con divisas
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.CurrenciesController.#ctor">
+        <member name="M:Nelmix.Controllers.CurrenciesController.#ctor(Nelmix.Context.CasinoContext)">
             <summary>
             Constructor del controlador CurrenciesController.
             </summary>

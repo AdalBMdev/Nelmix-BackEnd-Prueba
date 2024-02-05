@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Nelmix.Context;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace Nelmix.Services
@@ -6,38 +8,60 @@ namespace Nelmix.Services
     /// <summary>
     /// Clase que gestiona operaciones relacionadas con conversiones de moneda y fichas.
     /// </summary>
-    public class CurrenciesService
+    public class CurrenciesService 
     {
+
+        private readonly CasinoContext _context;
+
+        public CurrenciesService(CasinoContext context)
+        {
+            _context = context;
+        }
+
         /// <summary>
         /// Convierte el saldo de una cuenta a dólares.
         /// </summary>
         /// <param name="accountId">Identificador de la cuenta.</param>
         /// <returns>El saldo convertido a dólares.</returns>
-        public decimal ConvertCurrencyDollars(int accountId)
-        { 
-            var chain = new Connection();
-
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+        public async Task<decimal> ConvertCurrencyDollars(int accountId)
+        {
+            try
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("ConvertirMonedaADolares", cn);
-                
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add(new SqlParameter("@cuenta_id", accountId));
+                var cuentaBancaria = await _context.CuentasBancarias.FindAsync(accountId);
 
-                SqlParameter newBalanceParameter = new SqlParameter("@nuevoSaldo", SqlDbType.Decimal);
-                newBalanceParameter.Direction = ParameterDirection.Output;
-                cmd.Parameters.Add(newBalanceParameter);
+                if (cuentaBancaria != null)
+                {
+                    var monedaId = cuentaBancaria.MonedaId;
 
-                cmd.ExecuteNonQuery();
+                    var tasaConversion = await _context.TasasDeCambios
+                        .Where(tc => tc.MonedaId == monedaId)
+                        .Select(tc => tc.Tasa)
+                        .FirstOrDefaultAsync();
 
-                
-                return (decimal)newBalanceParameter.Value;
-                
-                
+                    if (tasaConversion > 0)
+                    {
+                        var nuevoSaldo = cuentaBancaria.Saldo * tasaConversion;
+
+                        cuentaBancaria.MonedaId = await _context.Monedas
+                            .Where(m => m.Nombre == "Dólar estadounidense")
+                            .Select(m => m.MonedaId)
+                            .FirstOrDefaultAsync();
+
+                        cuentaBancaria.Saldo = nuevoSaldo;
+
+                        await _context.SaveChangesAsync();
+
+                        return (decimal)nuevoSaldo;
+                    }
+                }
+
+                throw new Exception("Cuenta bancaria no encontrada o tasa de cambio no válida.");
             }
-
-          
+            catch (Exception ex)
+            {
+                // Manejar excepciones aquí
+                throw new Exception("Error durante la conversión a dólares.", ex);
+            }
         }
 
         /// <summary>
