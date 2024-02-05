@@ -147,11 +147,11 @@ namespace Nelmix.Controllers
         /// <param name="userId">Identificador del usuario a desactivar. Ejemplo: 1</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPut("desactivar-usuario")]
-        public IActionResult DesactivateUser(int userId)
+        public async Task<IActionResult> DesactivateUser(int userId)
         {
             try
             {
-                usuarioService.ChangeUserStatusInactive(userId);
+                await usuarioService.ChangeUserStatusInactiveAsync(userId);
                 return Ok("Usuario desactivado exitosamente.");
             }
 
@@ -159,7 +159,7 @@ namespace Nelmix.Controllers
             {
                 return StatusCode(500, "Error interno del servidor: " + ex.Message);
             }
-
         }
+
     }
 }

@@ -20,7 +20,6 @@
             </summary>
             <param name="userId">Identificador del usuario. Ejemplo: 1</param>
             <param name="monedaId">Identificador de la moneda. Ejemplo: 2</param>
-            <param name="saldo">Saldo inicial de la cuenta. Ejemplo: 1000.50</param>
             <returns>Un ActionResult que indica si la cuenta bancaria se creó con éxito.</returns>
         </member>
         <member name="M:Nelmix.Controllers.BankAccountController.DeleteBankAccount(System.Int32,System.Int32)">
@@ -663,7 +662,7 @@
             <param name="mailUserAdult">Correo electrónico del adulto responsable.</param>
             <returns>Una tupla que contiene un valor booleano (True si la asignación fue exitosa) y un mensaje de texto.</returns>
         </member>
-        <member name="M:Nelmix.Services.UserService.ChangeUserStatusInactive(System.Int32)">
+        <member name="M:Nelmix.Services.UserService.ChangeUserStatusInactiveAsync(System.Int32)">
             <summary>
             Cambia el estado de un usuario a inactivo.
             </summary>
