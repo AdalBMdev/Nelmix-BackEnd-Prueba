@@ -1,9 +1,8 @@
-﻿using System.Data;
-using System.Data.SqlClient;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Models;
 
 namespace Nelmix.Services
@@ -12,7 +11,7 @@ namespace Nelmix.Services
     /// Clase que gestiona operaciones relacionadas con usuarios, como el registro, inicio de sesión y cambio de contraseña.
     /// </summary>
     /// 
-    public class UserService
+    public class UserService : IUserService
     {
          private readonly CasinoContext _context;
 

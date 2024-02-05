@@ -147,7 +147,7 @@
             Controlador para operaciones relacionadas con Usuario.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.UserController.#ctor(Nelmix.Context.CasinoContext)">
+        <member name="M:Nelmix.Controllers.UserController.#ctor(Nelmix.Interfaces.IUserService)">
             <summary>
             Constructor del controlador UserController.
             </summary>

@@ -9,6 +9,8 @@ namespace Nelmix.Configuration
         public static void GetDependencyInjections(this IServiceCollection services)
         {
             services.AddScoped<IBankAccountService, BankAccountService>();
+            services.AddScoped<IUserService, UserService>();
+
 
         }
     }

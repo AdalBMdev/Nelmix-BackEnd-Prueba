@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Models;
 using Nelmix.Services;
 
@@ -11,16 +12,15 @@ namespace Nelmix.Controllers
     /// </summary>
     public class UserController : Controller
     {
-        private readonly UserService usuarioService;
-        private readonly CasinoContext _context;
+        private readonly IUserService _userService;
+
 
         /// <summary>
         /// Constructor del controlador UserController.
         /// </summary>
-        public UserController(CasinoContext context)
+        public UserController(IUserService userService)
         {
-            _context = context;
-            usuarioService = new UserService(_context);
+            _userService = userService;
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Nelmix.Controllers
             try
             {
 
-                bool registrationResult = await usuarioService.RegisterUser(oUsuario);
+                bool registrationResult = await _userService.RegisterUser(oUsuario);
 
                 if (registrationResult)
                 {
@@ -64,7 +64,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                bool loginResult = await usuarioService.Login(email, password);
+                bool loginResult = await _userService.Login(email, password);
 
                 if (loginResult)
                 {
@@ -94,7 +94,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                (bool success, string message) = await usuarioService.ChangePassword(email, password, newPassword);
+                (bool success, string message) = await _userService.ChangePassword(email, password, newPassword);
 
                 if (success)
                 {
@@ -123,7 +123,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                (bool registrado, string mensaje) = await usuarioService.AssignAdultResponsible(mailUserMinor, mailUserAdult);
+                (bool registrado, string mensaje) = await _userService.AssignAdultResponsible(mailUserMinor, mailUserAdult);
 
                 if (registrado)
                 {
@@ -151,7 +151,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                await usuarioService.ChangeUserStatusInactiveAsync(userId);
+                await _userService.ChangeUserStatusInactiveAsync(userId);
                 return Ok("Usuario desactivado exitosamente.");
             }
 
