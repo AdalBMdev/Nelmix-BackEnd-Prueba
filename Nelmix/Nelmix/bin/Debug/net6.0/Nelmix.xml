@@ -9,7 +9,7 @@
             Controlador para operaciones relacionadas con cuentas bancarias.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.BankAccountController.#ctor(Nelmix.Context.CasinoContext)">
+        <member name="M:Nelmix.Controllers.BankAccountController.#ctor(Nelmix.Interfaces.IBankAccountService)">
             <summary>
             Constructor del controlador BankAccountController.
             </summary>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
@@ -10,16 +11,14 @@ namespace Nelmix.Controllers
     /// </summary>
     public class BankAccountController : Controller
     {
-        private readonly BankAccountService cuentaBancariaService;
-        private readonly CasinoContext _context;
+        private readonly IBankAccountService _bankAccountService;
 
         /// <summary>
         /// Constructor del controlador BankAccountController.
         /// </summary>
-        public BankAccountController(CasinoContext context)
+        public BankAccountController(IBankAccountService bankAccountService)
         {
-            _context = context;
-            cuentaBancariaService = new BankAccountService(_context);
+            _bankAccountService = bankAccountService;
         }
 
         /// <summary>
@@ -30,11 +29,14 @@ namespace Nelmix.Controllers
         /// <param name="saldo">Saldo inicial de la cuenta. Ejemplo: 1000.50</param>
         /// <returns>Un ActionResult que indica si la cuenta bancaria se creó con éxito.</returns>
         [HttpPost("CrearCuentaBancaria")]
-        public IActionResult CreateBankAccount(int userId, int monedaId, decimal saldo)
+        public async Task<IActionResult> CreateBankAccount(int userId, int monedaId, decimal saldo)
         {
             try
             {
-                if (cuentaBancariaService.CreateBankAccount(userId, monedaId, saldo))
+                bool result = await _bankAccountService.CreateBankAccount(userId, monedaId, saldo);
+
+
+                if (result)
                 {
                     return Ok("Cuenta bancaria creada exitosamente.");
                 }
@@ -57,11 +59,13 @@ namespace Nelmix.Controllers
         /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
         /// <returns>Un ActionResult que indica si la cuenta bancaria se eliminó con éxito.</returns>
         [HttpDelete("EliminarCuentaBancaria")]
-        public IActionResult DeleteBankAccount(int cuentaId, int userId)
+        public async Task<IActionResult> DeleteBankAccount(int cuentaId, int userId)
         {
             try
             {
-                if (cuentaBancariaService.DeleteBankAccount(cuentaId, userId))
+                bool result = await _bankAccountService.DeleteBankAccount(cuentaId, userId);
+
+                if (result)
                 {
                     return Ok("Cuenta bancaria eliminada exitosamente.");
                 }
@@ -85,11 +89,13 @@ namespace Nelmix.Controllers
         /// <param name="balance">Saldo a añadir a la cuenta. Ejemplo: 50000</param>
         /// <returns>Un ActionResult que indica si el saldo se añadió con éxito a la cuenta bancaria.</returns>
         [HttpPost("añadir-saldo")]
-        public IActionResult AddBankAccountBalance(int userId, int currencyId, decimal balance)
+        public async Task<IActionResult> AddBankAccountBalance(int userId, int currencyId, decimal balance)
         {
             try
             {
-                if (cuentaBancariaService.AddBankAccountBalance(userId, currencyId, balance))
+                bool result = await _bankAccountService.AddBankAccountBalance(userId, currencyId, balance);
+
+                if (result)
                 {
                     return Ok("Saldo añadido con éxito.");
                 }
