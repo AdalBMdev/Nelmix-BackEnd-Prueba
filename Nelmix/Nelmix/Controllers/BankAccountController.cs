@@ -26,14 +26,13 @@ namespace Nelmix.Controllers
         /// </summary>
         /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
         /// <param name="monedaId">Identificador de la moneda. Ejemplo: 2</param>
-        /// <param name="saldo">Saldo inicial de la cuenta. Ejemplo: 1000.50</param>
         /// <returns>Un ActionResult que indica si la cuenta bancaria se creó con éxito.</returns>
         [HttpPost("CrearCuentaBancaria")]
-        public async Task<IActionResult> CreateBankAccount(int userId, int monedaId, decimal saldo)
+        public async Task<IActionResult> CreateBankAccount(int userId, int monedaId)
         {
             try
             {
-                bool result = await _bankAccountService.CreateBankAccount(userId, monedaId, saldo);
+                bool result = await _bankAccountService.CreateBankAccount(userId, monedaId);
 
 
                 if (result)

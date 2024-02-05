@@ -27,13 +27,13 @@ namespace Nelmix.Services
         /// <param name="currencyId">Identificador de la moneda.</param>
         /// <param name="balance">Saldo inicial de la cuenta.</param>
         /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
-        public async Task<bool> CreateBankAccount(int userId, int currencyId, decimal balance)
+        public async Task<bool> CreateBankAccount(int userId, int currencyId)
         {
             var newBankAccount = new CuentasBancaria
             {
                 UserId = userId,
                 MonedaId = currencyId,
-                Saldo = balance
+                Saldo = 0
             };
 
             _context.CuentasBancarias.Add(newBankAccount);

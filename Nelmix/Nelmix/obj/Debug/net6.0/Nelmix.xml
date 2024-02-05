@@ -14,7 +14,7 @@
             Constructor del controlador BankAccountController.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.BankAccountController.CreateBankAccount(System.Int32,System.Int32,System.Decimal)">
+        <member name="M:Nelmix.Controllers.BankAccountController.CreateBankAccount(System.Int32,System.Int32)">
             <summary>
             Crea una cuenta bancaria para un usuario.
             </summary>
@@ -453,7 +453,7 @@
             Clase que proporciona servicios relacionados con cuentas bancarias, como la creación, eliminación y adición de saldo a las cuentas bancarias de los usuarios.
             </summary>
         </member>
-        <member name="M:Nelmix.Services.BankAccountService.CreateBankAccount(System.Int32,System.Int32,System.Decimal)">
+        <member name="M:Nelmix.Services.BankAccountService.CreateBankAccount(System.Int32,System.Int32)">
             <summary>
             Crea una nueva cuenta bancaria para un usuario con un saldo inicial y una moneda específica.
             </summary>
