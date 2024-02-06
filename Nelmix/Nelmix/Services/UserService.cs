@@ -7,10 +7,7 @@ using Nelmix.Models;
 
 namespace Nelmix.Services
 {
-    /// <summary>
-    /// Clase que gestiona operaciones relacionadas con usuarios, como el registro, inicio de sesión y cambio de contraseña.
-    /// </summary>
-    /// 
+
     public class UserService : IUserService
     {
          private readonly CasinoContext _context;

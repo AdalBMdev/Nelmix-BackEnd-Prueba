@@ -7,9 +7,6 @@ using System.Data.SqlClient;
 
 namespace Nelmix.Services
 {
-    /// <summary>
-    /// Clase que proporciona servicios relacionados con cuentas bancarias, como la creación, eliminación y adición de saldo a las cuentas bancarias de los usuarios.
-    /// </summary>
     public class BankAccountService : IBankAccountService
     {
 
@@ -25,7 +22,6 @@ namespace Nelmix.Services
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
         /// <param name="currencyId">Identificador de la moneda.</param>
-        /// <param name="balance">Saldo inicial de la cuenta.</param>
         /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
         public async Task<bool> CreateBankAccount(int userId, int currencyId)
         {

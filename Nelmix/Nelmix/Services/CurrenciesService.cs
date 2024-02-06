@@ -6,9 +6,6 @@ using System.Data;
 
 namespace Nelmix.Services
 {
-    /// <summary>
-    /// Clase que gestiona operaciones relacionadas con conversiones de moneda y fichas.
-    /// </summary>
     public class CurrenciesService : ICurrenciesServices
     {
 

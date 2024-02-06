@@ -7,9 +7,6 @@ using Nelmix.Models;
 
 namespace Nelmix.Services
 {
-    /// <summary>
-    /// Clase que gestiona operaciones relacionadas con el estado financiero de los usuarios, como la obtención de saldos, ganancias, pérdidas y fichas.
-    /// </summary>
     public class FinanceService : IFinanceService
     {
 
@@ -23,10 +20,6 @@ namespace Nelmix.Services
         /// Obtiene el estado financiero de un usuario, incluyendo su saldo actual, ganancias, pérdidas y cantidad de fichas.
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="balance">Saldo actual del usuario.</param>
-        /// <param name="earnings">Ganancias totales del usuario.</param>
-        /// <param name="losses">Pérdidas totales del usuario.</param>
-        /// <param name="chips">Cantidad de fichas del usuario.</param>
         /// <returns>True si se obtiene el estado financiero con éxito, de lo contrario, False.</returns>
         public async Task<EstadoFinanciero> GetFinancialStatusUser(int userId)
         {
