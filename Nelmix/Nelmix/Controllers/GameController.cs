@@ -51,7 +51,7 @@ namespace Nelmix.Controllers
                 return BadRequest("No se ha determinado una victoria o derrota.");
             }
 
-            gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, finalVictory, gameId);
+            await gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, finalVictory, gameId);
 
             return Ok(resultMessage);
         }
@@ -71,14 +71,14 @@ namespace Nelmix.Controllers
             int gameId = 2;
 
             var verificationResult = await gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
-
+        
             if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
 
             var (victory, resultMessage) = gameService.PlayTragaperras();
-            gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
+            await gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
 
             return Ok(resultMessage);
         }
@@ -106,7 +106,7 @@ namespace Nelmix.Controllers
             }
 
             var (victory, resultMessage) = gameService.PlayBlackjack();
-            gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
+            await gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
 
             return Ok(resultMessage);
         }

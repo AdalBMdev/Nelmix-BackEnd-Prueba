@@ -104,7 +104,7 @@
             Controlador para operaciones relacionadas con juegos de casino.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.GameController.#ctor">
+        <member name="M:Nelmix.Controllers.GameController.#ctor(Nelmix.Context.CasinoContext)">
             <summary>
             Constructor del controlador GameController.
             </summary>
@@ -564,11 +564,10 @@
         </member>
         <member name="M:Nelmix.Services.GameService.VerifyGainLimit(System.Int32)">
             <summary>
-            Verifica si un usuario ha excedido el límite de pérdida en un juego específico.
+            Verifica si un usuario ha excedido el límite de ganancia en un juego específico.
             </summary>
             <param name="userId">Identificador del usuario.</param>
-            <param name="juegoId">Identificador del juego.</param>
-            <returns>True si el usuario ha excedido el límite de pérdida, de lo contrario, False.</returns>
+            <returns>True si el usuario ha excedido el límite de ganancia, de lo contrario, False.</returns>
         </member>
         <member name="M:Nelmix.Services.GameService.ManageUserGame(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean,System.Int32)">
             <summary>

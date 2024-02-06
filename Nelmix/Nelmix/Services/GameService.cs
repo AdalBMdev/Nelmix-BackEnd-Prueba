@@ -155,36 +155,23 @@ namespace Nelmix.Services
         /// <param name="victory">Indica si el usuario ha ganado el juego.</param>
         /// <param name="gameId">Identificador del juego.</param>
         /// <returns>True si la gestión del juego se realiza con éxito, de lo contrario, False.</returns>
-        public bool ManageUserGame(int userId, int redChips, int yellowChips, int greenChips, int blackChips, bool victory, int gameId)
+        public async Task<bool> ManageUserGame(int userId, int redChips, int yellowChips, int greenChips, int blackChips, bool victory, int gameId)
         {
             try
             {
-                var chain = new Connection();
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC GestionarJuegoUsuario @usuario_id={0}, @fichas_rojas={1}, @fichas_amarillas={2}, @fichas_verdes={3}, @fichas_negras={4}, @victoria={5}, @juego_id={6}",
+                    userId, redChips, yellowChips, greenChips, blackChips, victory ? 1 : 0, gameId);
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("GestionarJuegoUsuario", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
-                        cmd.Parameters.AddWithValue("@fichas_rojas", redChips);
-                        cmd.Parameters.AddWithValue("@fichas_amarillas", yellowChips);
-                        cmd.Parameters.AddWithValue("@fichas_verdes", greenChips);
-                        cmd.Parameters.AddWithValue("@fichas_negras", blackChips);
-                        cmd.Parameters.AddWithValue("@victoria", victory);
-                        cmd.Parameters.AddWithValue("@juego_id", gameId);
 
-                        cmd.ExecuteNonQuery();
-                    }
-                }
                 return true;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
                 throw new Exception("Error al gestionar el juego del usuario", ex);
             }
         }
+
 
         /// <summary>
         /// Verifica si un usuario cumple con los requisitos para jugar, incluyendo elegibilidad, disponibilidad de fichas y límites de ganancia y pérdida.
@@ -210,12 +197,12 @@ namespace Nelmix.Services
                     return false;
                 }
 
-                if (!await VerifyGainLimit(usuarioId))
+                if (await VerifyGainLimit(usuarioId))
                 {
                     return false;
                 }
 
-                if (!await VerifyLoseLimit(usuarioId, juegoId))
+                if (await VerifyLoseLimit(usuarioId, juegoId))
                 {
                     return false;
                 }
