@@ -60,8 +60,8 @@ namespace Nelmix.Services
             }
             catch (Exception ex)
             {
-                // Manejar excepciones aquí
-                throw new Exception("Error durante la conversión a dólares.", ex);
+
+                throw new Exception("Error durante la conversión a dólares." + ex.Message);
             }
         }
 

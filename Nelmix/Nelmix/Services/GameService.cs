@@ -47,7 +47,7 @@ namespace Nelmix.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al verificar elegibilidad para jugar", ex);
+                throw new Exception("Error al verificar elegibilidad para jugar" + ex.Message);
             }
         }
 
@@ -86,7 +86,7 @@ namespace Nelmix.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al verificar disponibilidad de fichas", ex);
+                throw new Exception("Error al verificar disponibilidad de fichas" + ex.Message);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Nelmix.Services
             catch (Exception ex)
             {
                 // Manejar y registrar el error aquí
-                throw new Exception("Error al verificar límite de pérdida en el juego", ex);
+                throw new Exception("Error al verificar límite de pérdida en el juego" + ex.Message);
             }
         }
 
@@ -140,7 +140,7 @@ namespace Nelmix.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al verificar límite de ganancia", ex);
+                throw new Exception("Error al verificar límite de ganancia" + ex.Message);
             }
         }
 
@@ -169,7 +169,7 @@ namespace Nelmix.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al gestionar el juego del usuario", ex);
+                throw new Exception("Error al gestionar el juego del usuario" + ex.Message);
             }
         }
 

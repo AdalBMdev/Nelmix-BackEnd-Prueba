@@ -100,8 +100,7 @@ namespace Nelmix.Controllers
 
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al Comprar Fichas En Dolares.");
+                return StatusCode(500, "Se produjo un error en el servidor al Comprar Fichas En Dolares." + ex.Message);
             }
         }
 

@@ -46,8 +46,7 @@ namespace Nelmix.Controllers
             }
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al CrearCuentaBancaria.");
+                return StatusCode(500, "Se produjo un error en el servidor al CrearCuentaBancaria." + ex.Message);
             }
         }
 
@@ -75,8 +74,7 @@ namespace Nelmix.Controllers
             }
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al EliminarCuentaBancaria.");
+                return StatusCode(500, "Se produjo un error en el servidor al EliminarCuentaBancaria." + ex.Message);
             }
         }
 
@@ -104,8 +102,7 @@ namespace Nelmix.Controllers
 
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al añadir saldo a la cuenta.");
+                return StatusCode(500, "Se produjo un error en el servidor al añadir saldo a la cuenta." + ex.Message);
             }
 
         }
