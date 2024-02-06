@@ -5,18 +5,11 @@ using Nelmix.Services;
 
 namespace Nelmix.Controllers
 {
-
-    /// <summary>
-    /// Controlador para operaciones relacionadas con juegos de casino.
-    /// </summary>
     public class GameController : Controller
     {
 
         private readonly IGameService _gameService;
 
-        /// <summary>
-        /// Constructor del controlador GameController.
-        /// </summary>
         public GameController(IGameService gameService)
         {
             _gameService = gameService;

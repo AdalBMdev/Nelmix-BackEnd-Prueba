@@ -6,16 +6,10 @@ using Nelmix.Services;
 namespace Nelmix.Controllers
 {
 
-    /// <summary>
-    /// Controlador para operaciones relacionadas con la economia del usuario
-    /// </summary>
     public class FinanceController : Controller
     {
         private readonly IFinanceService _finanzasService;
 
-        /// <summary>
-        /// Constructor del controlador FinanceController.
-        /// </summary>
         public FinanceController(IFinanceService finanzasService)
         {
             _finanzasService = finanzasService;

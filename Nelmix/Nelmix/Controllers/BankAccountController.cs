@@ -6,16 +6,10 @@ using Nelmix.Services;
 namespace Nelmix.Controllers
 {
 
-    /// <summary>
-    /// Controlador para operaciones relacionadas con cuentas bancarias.
-    /// </summary>
     public class BankAccountController : Controller
     {
         private readonly IBankAccountService _bankAccountService;
 
-        /// <summary>
-        /// Constructor del controlador BankAccountController.
-        /// </summary>
         public BankAccountController(IBankAccountService bankAccountService)
         {
             _bankAccountService = bankAccountService;

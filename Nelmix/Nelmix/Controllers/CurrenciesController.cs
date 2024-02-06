@@ -7,17 +7,11 @@ using Nelmix.Services;
 namespace Nelmix.Controllers
 {
 
-    /// <summary>
-    /// Controlador para operaciones relacionadas con divisas
-    /// </summary>
     public class CurrenciesController : Controller
     {
         
         private readonly ICurrenciesServices _currenciesServices;
 
-        /// <summary>
-        /// Constructor del controlador CurrenciesController.
-        /// </summary>
         public CurrenciesController(ICurrenciesServices currenciesServices)
         {
             _currenciesServices = currenciesServices;

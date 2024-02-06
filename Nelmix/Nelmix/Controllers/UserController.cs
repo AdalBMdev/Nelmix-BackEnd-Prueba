@@ -6,18 +6,9 @@ using Nelmix.Services;
 
 namespace Nelmix.Controllers
 {
-
-    /// <summary>
-    /// Controlador para operaciones relacionadas con Usuario.
-    /// </summary>
     public class UserController : Controller
     {
         private readonly IUserService _userService;
-
-
-        /// <summary>
-        /// Constructor del controlador UserController.
-        /// </summary>
         public UserController(IUserService userService)
         {
             _userService = userService;
