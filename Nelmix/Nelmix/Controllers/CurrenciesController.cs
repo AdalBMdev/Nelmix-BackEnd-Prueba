@@ -86,15 +86,15 @@ namespace Nelmix.Controllers
         /// </summary>
         /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
         /// <param name="typeFileId">Identificador del tipo de ficha. Ejemplo: 1</param>
-        /// <param name="currencyDestination">Moneda de destino para el intercambio(Nombre especifico de la moneda). Ejemplo: Peso dominicano</param>
+        /// <param name="currencyDestinationId">Id de la moneda de destino para el intercambio. Ejemplo: 2</param>
         /// <param name="quantityFichas">Cantidad de fichas a intercambiar. Ejemplo: 10</param>
         /// <returns>Un ActionResult que indica si el intercambio de fichas a moneda se realizó con éxito.</returns>
         [HttpPost("CambioFichasAMoneda")]
-        public IActionResult ExchangeChipsToCurrency(int userId, int typeFileId, string currencyDestination, int quantityFichas)
+        public async Task<IActionResult> ExchangeChipsToCurrency(int userId, int typeFileId, int currencyDestinationId, int quantityFichas)
         {
             try
             {
-                var resultado = divisasService.ExchangeChipsToCurrency(userId, typeFileId, currencyDestination, quantityFichas);
+                var resultado = await divisasService.ExchangeChipsToCurrency(userId, typeFileId, currencyDestinationId, quantityFichas);
                 return Ok(resultado);
             }
 

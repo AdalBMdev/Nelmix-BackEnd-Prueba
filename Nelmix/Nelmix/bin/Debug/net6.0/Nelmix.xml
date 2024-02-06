@@ -65,13 +65,13 @@
             <param name="quantity">Cantidad de fichas a comprar. Ejemplo: 10</param>
             <returns>Un ActionResult que indica si la compra de fichas en dólares se realizó con éxito.</returns>
         </member>
-        <member name="M:Nelmix.Controllers.CurrenciesController.ExchangeChipsToCurrency(System.Int32,System.Int32,System.String,System.Int32)">
+        <member name="M:Nelmix.Controllers.CurrenciesController.ExchangeChipsToCurrency(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
             Realiza el intercambio de fichas por una moneda específica menos dolares.
             </summary>
             <param name="userId">Identificador del usuario. Ejemplo: 1</param>
             <param name="typeFileId">Identificador del tipo de ficha. Ejemplo: 1</param>
-            <param name="currencyDestination">Moneda de destino para el intercambio(Nombre especifico de la moneda). Ejemplo: Peso dominicano</param>
+            <param name="currencyDestinationId">Id de la moneda de destino para el intercambio. Ejemplo: 2</param>
             <param name="quantityFichas">Cantidad de fichas a intercambiar. Ejemplo: 10</param>
             <returns>Un ActionResult que indica si el intercambio de fichas a moneda se realizó con éxito.</returns>
         </member>
@@ -499,13 +499,13 @@
             <param name="quantity">Cantidad de fichas a comprar.</param>
             <returns>Un mensaje indicando si la compra de fichas fue exitosa o un mensaje de error.</returns>
         </member>
-        <member name="M:Nelmix.Services.CurrenciesService.ExchangeChipsToCurrency(System.Int32,System.Int32,System.String,System.Int32)">
+        <member name="M:Nelmix.Services.CurrenciesService.ExchangeChipsToCurrency(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
             Intercambia fichas por una moneda específica para un usuario.
             </summary>
             <param name="userId">Identificador del usuario.</param>
             <param name="typeFileId">Identificador del tipo de ficha.</param>
-            <param name="currencyDestination">Moneda de destino para la conversión.</param>
+            <param name="currencyDestinationId">Moneda de destino para la conversión.</param>
             <param name="quantityFichas">Cantidad de fichas a convertir.</param>
             <returns>Un mensaje indicando si la conversión de fichas fue exitosa o un mensaje de error.</returns>
         </member>

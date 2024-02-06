@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Nelmix")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+94447815ff582d4daae84b140fc64a8069f4e25f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5d3eb83ba1dd90109b40071b74dcef4ea8d018cc")]
 [assembly: System.Reflection.AssemblyProductAttribute("Nelmix")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Nelmix")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

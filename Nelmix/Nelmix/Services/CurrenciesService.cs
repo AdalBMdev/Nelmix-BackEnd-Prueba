@@ -2,7 +2,6 @@
 using Nelmix.Context;
 using Nelmix.Models;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace Nelmix.Services
 {
@@ -133,33 +132,77 @@ namespace Nelmix.Services
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
         /// <param name="typeFileId">Identificador del tipo de ficha.</param>
-        /// <param name="currencyDestination">Moneda de destino para la conversión.</param>
+        /// <param name="currencyDestinationId">Moneda de destino para la conversión.</param>
         /// <param name="quantityFichas">Cantidad de fichas a convertir.</param>
         /// <returns>Un mensaje indicando si la conversión de fichas fue exitosa o un mensaje de error.</returns>
-        public string ExchangeChipsToCurrency(int userId, int typeFileId, string currencyDestination, int quantityFichas)
+        public async Task<string> ExchangeChipsToCurrency(int userId, int typeFileId, int currencyDestinationId, int quantityFichas)
         {
-
-            var chain = new Connection();
-
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+            try
             {
-                cn.Open();
+                var tipoFicha = await _context.TiposDeFichas.FindAsync(typeFileId);
+                var cuentaBancaria = await _context.CuentasBancarias
+                    .FirstOrDefaultAsync(cb => cb.UserId == userId);
 
-                SqlCommand cmd = new SqlCommand("CambiarFichasAMonedaUsuario", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add(new SqlParameter("@usuario_id", userId));
-                cmd.Parameters.Add(new SqlParameter("@tipo_ficha_id", typeFileId));
-                cmd.Parameters.Add(new SqlParameter("@moneda_destino", currencyDestination));
-                cmd.Parameters.Add(new SqlParameter("@cantidad_fichas_a_convertir", quantityFichas));
+                if (tipoFicha != null && cuentaBancaria != null)
+                {
+                    int? valorFicha = tipoFicha.Valor;
+                    int? monedaActual = cuentaBancaria.MonedaId;  
+                    decimal? saldoUsuario = cuentaBancaria.Saldo;
 
-                // Ejecuta el procedimiento almacenado.
-                cmd.ExecuteNonQuery();
+                    decimal? tasaConversion = await _context.TasasDeCambios
+                        .Where(tc => tc.MonedaId == currencyDestinationId)
+                        .Select(tc => tc.Tasa)
+                        .FirstOrDefaultAsync();
 
-                return "Cambio de fichas exitoso.";
-                
+                    int? cantidadFichasDisponibles = await _context.Fichas
+                        .Where(f => f.UsuarioId == userId && f.TipoFichaId == typeFileId)
+                        .Select(f => f.CantidadDisponible)
+                        .FirstOrDefaultAsync();
+
+                    if (cantidadFichasDisponibles >= quantityFichas && currencyDestinationId != 1)
+                    {
+                        decimal? valorTotalDestino = valorFicha * quantityFichas;
+
+                        if (monedaActual != currencyDestinationId)
+                        {
+                            valorTotalDestino = (valorFicha * quantityFichas + saldoUsuario) / tasaConversion;
+                        }
+
+                        else valorTotalDestino = (valorFicha * quantityFichas + saldoUsuario);
+
+                        cuentaBancaria.Saldo = valorTotalDestino;
+                        cuentaBancaria.MonedaId = currencyDestinationId; 
+
+                        var fichasUsuario = await _context.Fichas
+                            .FirstOrDefaultAsync(f => f.UsuarioId == userId && f.TipoFichaId == typeFileId);
+
+                        if (fichasUsuario != null)
+                        {
+                            fichasUsuario.CantidadDisponible -= quantityFichas;
+                        }
+
+                        await _context.SaveChangesAsync();
+
+                        return $"Cambio de fichas exitoso. Nuevo saldo en {currencyDestinationId}: {valorTotalDestino}";
+                    }
+                    else
+                    {
+                        return "No tienes suficientes fichas para realizar el cambio o no puedes cambiar a dólares.";
+                    }
+                }
+                else
+                {
+                    return "Error al cambiar las fichas de moneda.";
+                }
             }
-
-            return "Error al cambiar las fichas de moneda.";
+            catch (Exception ex)
+            {
+                return $"Se produjo un error al realizar el cambio de fichas a moneda: {ex.Message}";
+            } 
         }
+
+
+
+
     }
 }
