@@ -674,21 +674,5 @@
             <param name="inputString">Cadena de entrada que se convertirá en hash.</param>
             <returns>El hash SHA-256 de la cadena de entrada.</returns>
         </member>
-        <member name="T:Connection">
-            <summary>
-            Clase que proporciona la cadena de conexión a la base de datos SQL Server desde la configuración de la aplicación.
-            </summary>
-        </member>
-        <member name="M:Connection.#ctor">
-            <summary>
-            Constructor de la clase que inicializa la cadena de conexión desde la configuración de la aplicación.
-            </summary>
-        </member>
-        <member name="M:Connection.getCadenaSQL">
-            <summary>
-            Obtiene la cadena de conexión a la base de datos SQL Server.
-            </summary>
-            <returns>La cadena de conexión a la base de datos.</returns>
-        </member>
     </members>
 </doc>
