@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -9,7 +10,7 @@ namespace Nelmix.Services
     /// <summary>
     /// Clase que gestiona operaciones relacionadas con juegos, como la verificación de elegibilidad para jugar, la disponibilidad de fichas y los límites de pérdida y ganancia.
     /// </summary>
-    public class GameService
+    public class GameService : IGameService
     {
 
         private readonly CasinoContext _context;

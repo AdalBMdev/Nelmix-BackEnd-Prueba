@@ -104,7 +104,7 @@
             Controlador para operaciones relacionadas con juegos de casino.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.GameController.#ctor(Nelmix.Context.CasinoContext)">
+        <member name="M:Nelmix.Controllers.GameController.#ctor(Nelmix.Interfaces.IGameService)">
             <summary>
             Constructor del controlador GameController.
             </summary>

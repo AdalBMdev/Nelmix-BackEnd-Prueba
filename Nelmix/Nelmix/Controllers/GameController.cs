@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
@@ -10,16 +11,15 @@ namespace Nelmix.Controllers
     /// </summary>
     public class GameController : Controller
     {
-        private readonly GameService gameService;
-        private readonly CasinoContext _context;
+
+        private readonly IGameService _gameService;
 
         /// <summary>
         /// Constructor del controlador GameController.
         /// </summary>
-        public GameController(CasinoContext context)
+        public GameController(IGameService gameService)
         {
-            _context = context;
-            gameService = new GameService(_context);
+            _gameService = gameService;
         }
 
         /// <summary>
@@ -36,14 +36,14 @@ namespace Nelmix.Controllers
         {
             int gameId = 1;
 
-            var verificationResult = await gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
 
             if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
 
-            var (victory, resultMessage) = gameService.PlayCraps();
+            var (victory, resultMessage) = _gameService.PlayCraps();
             bool finalVictory = victory ?? false; 
 
             if (victory == null)
@@ -51,7 +51,7 @@ namespace Nelmix.Controllers
                 return BadRequest("No se ha determinado una victoria o derrota.");
             }
 
-            await gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, finalVictory, gameId);
+            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, finalVictory, gameId);
 
             return Ok(resultMessage);
         }
@@ -70,15 +70,15 @@ namespace Nelmix.Controllers
         {
             int gameId = 2;
 
-            var verificationResult = await gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
         
             if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
 
-            var (victory, resultMessage) = gameService.PlayTragaperras();
-            await gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
+            var (victory, resultMessage) = _gameService.PlayTragaperras();
+            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
 
             return Ok(resultMessage);
         }
@@ -98,15 +98,15 @@ namespace Nelmix.Controllers
 
             int gameId = 3;
 
-            var verificationResult = await gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
 
             if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
 
-            var (victory, resultMessage) = gameService.PlayBlackjack();
-            await gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
+            var (victory, resultMessage) = _gameService.PlayBlackjack();
+            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
 
             return Ok(resultMessage);
         }

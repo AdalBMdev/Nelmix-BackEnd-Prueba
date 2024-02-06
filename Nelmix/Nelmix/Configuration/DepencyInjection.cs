@@ -11,6 +11,8 @@ namespace Nelmix.Configuration
             services.AddScoped<IBankAccountService, BankAccountService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICurrenciesServices, CurrenciesService>();
+            services.AddScoped<IGameService, GameService>();
+
 
         }
     }
