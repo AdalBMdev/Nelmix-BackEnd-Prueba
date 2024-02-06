@@ -80,7 +80,7 @@
             Controlador para operaciones relacionadas con la economia del usuario
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.FinanceController.#ctor(Nelmix.Context.CasinoContext)">
+        <member name="M:Nelmix.Controllers.FinanceController.#ctor(Nelmix.Interfaces.IFinanceService)">
             <summary>
             Constructor del controlador FinanceController.
             </summary>

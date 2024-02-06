@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
@@ -10,16 +11,14 @@ namespace Nelmix.Controllers
     /// </summary>
     public class FinanceController : Controller
     {
-        private readonly FinanceService finanzasService;
-        private readonly CasinoContext _context;
+        private readonly IFinanceService _finanzasService;
 
         /// <summary>
         /// Constructor del controlador FinanceController.
         /// </summary>
-        public FinanceController(CasinoContext context)
+        public FinanceController(IFinanceService finanzasService)
         {
-            _context = context;
-            finanzasService = new FinanceService(_context);
+            _finanzasService = finanzasService;
         }
 
         /// <summary>
@@ -32,7 +31,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                var financialStatus = await finanzasService.GetFinancialStatusUser(userId);
+                var financialStatus = await _finanzasService.GetFinancialStatusUser(userId);
 
                 if (financialStatus != null)
                 {
@@ -65,7 +64,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                var resultados = await finanzasService.GetProfitAndLossFromGaming(userId);
+                var resultados = await _finanzasService.GetProfitAndLossFromGaming(userId);
 
                 if (resultados == null || resultados.Count == 0)
                 {

@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Models;
 
 namespace Nelmix.Services
@@ -9,7 +10,7 @@ namespace Nelmix.Services
     /// <summary>
     /// Clase que gestiona operaciones relacionadas con el estado financiero de los usuarios, como la obtención de saldos, ganancias, pérdidas y fichas.
     /// </summary>
-    public class FinanceService
+    public class FinanceService : IFinanceService
     {
 
         private readonly CasinoContext _context;
