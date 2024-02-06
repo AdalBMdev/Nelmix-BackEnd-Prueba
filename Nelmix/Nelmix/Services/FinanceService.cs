@@ -58,15 +58,6 @@ namespace Nelmix.Services
             }
         }
 
-        public class FinancialStatus
-        {
-            public decimal Balance { get; set; }
-            public decimal Earnings { get; set; }
-            public decimal Losses { get; set; }
-            public int Chips { get; set; }
-        }
-
-
         /// <summary>
         /// Obtiene las ganancias y pérdidas por juego para un usuario específico.
         /// </summary>
