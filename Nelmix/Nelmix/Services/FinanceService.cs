@@ -63,44 +63,30 @@ namespace Nelmix.Services
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
         /// <returns>Una lista de objetos de tipo GananciasYPérdidasPorJuego que contiene información sobre ganancias y pérdidas por juego.</returns>
-        public List<GananciasYPérdidasPorJuego> GetProfitAndLossFromGaming(int userId)
+        public async Task<List<GananciasYPérdidasPorJuego>> GetProfitAndLossFromGaming(int userId)
         {
             try
             {
-                var chain = new Connection();
+                var parameters = new List<SqlParameter>
+        {
+            new SqlParameter("@usuario_id", userId)
+        };
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    SqlCommand cmd = new SqlCommand("ObtenerGananciasYPérdidasPorJuego", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@usuario_id", userId);
+                var results = await _context.Set<GananciasYPérdidasPorJuego>()
+                    .FromSqlRaw("EXEC ObtenerGananciasYPérdidasPorJuego @usuario_id", parameters.ToArray())
+                    .ToListAsync();
 
-                    cn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        var results = new List<GananciasYPérdidasPorJuego>();
-
-                        while (reader.Read())
-                        {
-                            var result = new GananciasYPérdidasPorJuego
-                            {
-                                NombreJuego = reader["nombre_juego"].ToString(),
-                                Ganancias = (decimal)reader["ganancias"],
-                                Pérdidas = (decimal)reader["pérdidas"]
-                            };
-
-                            results.Add(result);
-                        }
-
-                        return results;
-                    }
-                }
+                return results;
             }
             catch (Exception ex)
             {
                 throw new Exception("Error al obtener las ganancias y pérdidas por juego: " + ex.Message);
             }
         }
+
+
+
+
 
     }
 }

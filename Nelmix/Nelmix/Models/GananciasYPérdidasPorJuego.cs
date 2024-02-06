@@ -1,4 +1,6 @@
-﻿namespace Nelmix.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Nelmix.Models
 {
     /// <summary>
     /// Representa las ganancias y pérdidas por juego de un usuario.
@@ -8,6 +10,7 @@
         /// <summary>
         /// Obtiene o establece el nombre del juego.
         /// </summary>
+        [Column("nombre_juego")]
         public string NombreJuego { get; set; }
 
         /// <summary>

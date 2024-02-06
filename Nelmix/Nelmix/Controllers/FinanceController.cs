@@ -61,12 +61,11 @@ namespace Nelmix.Controllers
         /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
         /// <returns>Un ActionResult que contiene una lista de ganancias y pérdidas por juego.</returns>
         [HttpGet("ganancias-y-perdidas-por-juego")]
-        public IActionResult ObtenerGananciasYPérdidasPorJuego(int userId)
+        public async Task<IActionResult> ObtenerGananciasYPérdidasPorJuego(int userId)
         {
-
             try
             {
-                var resultados = finanzasService.GetProfitAndLossFromGaming(userId);
+                var resultados = await finanzasService.GetProfitAndLossFromGaming(userId);
 
                 if (resultados == null || resultados.Count == 0)
                 {
@@ -75,13 +74,11 @@ namespace Nelmix.Controllers
 
                 return Ok(resultados);
             }
-
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al obtener ganancias y perdidas por juego.");
+                return StatusCode(500, "Se produjo un error en el servidor al obtener ganancias y pérdidas por juego: " + ex.Message);
             }
-
         }
+
     }
 }

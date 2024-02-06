@@ -24,6 +24,7 @@ namespace Nelmix.Context
         public virtual DbSet<TasasDeCambio> TasasDeCambios { get; set; } = null!;
         public virtual DbSet<TiposDeFicha> TiposDeFichas { get; set; } = null!;
         public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
+        public virtual DbSet<GananciasYPérdidasPorJuego> GananciasYPérdidasPorJuegos { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -32,6 +33,9 @@ namespace Nelmix.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<GananciasYPérdidasPorJuego>().HasNoKey();
+
             modelBuilder.Entity<ApuestasUsuario>(entity =>
             {
                 entity.HasKey(e => e.ApuestaId)
