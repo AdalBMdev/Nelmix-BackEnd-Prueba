@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Nelmix.Context;
+using System.Data;
 using System.Data.SqlClient;
 
 
@@ -9,44 +11,45 @@ namespace Nelmix.Services
     /// </summary>
     public class GameService
     {
+
+        private readonly CasinoContext _context;
+
+        public GameService(CasinoContext context)
+        {
+            _context = context;
+        }
         /// <summary>
         /// Verifica si un usuario es elegible para jugar.
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
-        public bool VerifyEligibilityToPlay(int userId)
+        public async Task<bool> VerifyEligibilityToPlay(int userId)
         {
             try
             {
-                var chain = new Connection();
+                var usuario = await _context.Usuarios
+                    .Where(u => u.UserId == userId)
+                    .FirstOrDefaultAsync();
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+                if (usuario != null)
                 {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("VerificarElegibilidadParaJugar", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
+                    int edad = usuario.Edad;
+                    int adultoAsignadoId = usuario.AdultoAsignadoId;
 
-                        SqlParameter elegible = new SqlParameter("@esElegible", SqlDbType.Bit)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(elegible);
+                    bool esElegible = edad >= 21 || adultoAsignadoId != 0;
 
-                        cmd.ExecuteNonQuery();
-
-                        bool esElegible = Convert.ToBoolean(elegible.Value);
-                        return esElegible;
-                    }
+                    return esElegible;
+                }
+                else
+                {
+                    throw new Exception("Usuario no encontrado");
                 }
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                // Aquí puedes registrar la excepción en un sistema de registro o lanzar una excepción personalizada
-                // para manejarla en un nivel superior si es necesario.
                 throw new Exception("Error al verificar elegibilidad para jugar", ex);
             }
         }
+
 
         /// <summary>
         /// Verifica si un usuario tiene suficientes fichas disponibles para jugar.
@@ -229,11 +232,11 @@ namespace Nelmix.Services
         /// <param name="blackChips">Cantidad de fichas negras.</param>
         /// <param name="juegoId">Identificador del juego.</param>
         /// <returns>True si el usuario cumple con los requisitos para jugar, de lo contrario, False.</returns>
-        public bool VerifyPlay(int usuarioId, int redChips, int yellowChips, int greenChips, int blackChips, int juegoId)
+        public async Task<bool> VerifyPlay(int usuarioId, int redChips, int yellowChips, int greenChips, int blackChips, int juegoId)
         {
             try
             {
-                if (!VerifyEligibilityToPlay(usuarioId))
+                if (!(await VerifyEligibilityToPlay(usuarioId)))
                 {
                     return false;
                 }

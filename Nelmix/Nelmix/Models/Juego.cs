@@ -13,6 +13,6 @@
         /// <summary>
         /// Obtiene o establece el nombre del juego.
         /// </summary>
-        public string? Nombre { get; set; }
+        public string Nombre { get; set; }
     }
 }

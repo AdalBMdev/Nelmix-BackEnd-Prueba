@@ -13,11 +13,11 @@
         /// <summary>
         /// Obtiene o establece el nombre del tipo de ficha.
         /// </summary>
-        public string? Nombre { get; set; }
+        public string Nombre { get; set; }
 
         /// <summary>
         /// Obtiene o establece el valor asociado al tipo de ficha.
         /// </summary>
-        public int? Valor { get; set; }
+        public int Valor { get; set; }
     }
 }

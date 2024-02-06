@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nelmix.Context;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
@@ -10,13 +11,15 @@ namespace Nelmix.Controllers
     public class GameController : Controller
     {
         private readonly GameService gameService;
+        private readonly CasinoContext _context;
 
         /// <summary>
         /// Constructor del controlador GameController.
         /// </summary>
-        public GameController()
+        public GameController(CasinoContext context)
         {
-            gameService = new GameService();
+            _context = context;
+            gameService = new GameService(_context);
         }
 
         /// <summary>

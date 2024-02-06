@@ -146,23 +146,23 @@ namespace Nelmix.Services
 
                 if (tipoFicha != null && cuentaBancaria != null)
                 {
-                    int? valorFicha = tipoFicha.Valor;
-                    int? monedaActual = cuentaBancaria.MonedaId;  
-                    decimal? saldoUsuario = cuentaBancaria.Saldo;
+                    int valorFicha = tipoFicha.Valor;
+                    int monedaActual = cuentaBancaria.MonedaId;  
+                    decimal saldoUsuario = cuentaBancaria.Saldo;
 
-                    decimal? tasaConversion = await _context.TasasDeCambios
+                    decimal tasaConversion = await _context.TasasDeCambios
                         .Where(tc => tc.MonedaId == currencyDestinationId)
                         .Select(tc => tc.Tasa)
                         .FirstOrDefaultAsync();
 
-                    int? cantidadFichasDisponibles = await _context.Fichas
+                    int cantidadFichasDisponibles = await _context.Fichas
                         .Where(f => f.UsuarioId == userId && f.TipoFichaId == typeFileId)
                         .Select(f => f.CantidadDisponible)
                         .FirstOrDefaultAsync();
 
                     if (cantidadFichasDisponibles >= quantityFichas && currencyDestinationId != 1)
                     {
-                        decimal? valorTotalDestino = valorFicha * quantityFichas;
+                        decimal valorTotalDestino = valorFicha * quantityFichas;
 
                         if (monedaActual != currencyDestinationId)
                         {

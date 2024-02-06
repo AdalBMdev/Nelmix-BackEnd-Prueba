@@ -16,6 +16,6 @@ namespace Nelmix.Models
         /// <summary>
         /// Obtiene o establece el nombre del estado.
         /// </summary>
-        public string? Nombre { get; set; }
+        public string Nombre { get; set; }
     }
 }

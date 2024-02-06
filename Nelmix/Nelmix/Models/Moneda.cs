@@ -21,12 +21,12 @@
         /// <summary>
         /// Obtiene o establece el nombre de la moneda.
         /// </summary>
-        public string? Nombre { get; set; }
+        public string Nombre { get; set; }
 
         /// <summary>
         /// Obtiene o establece el símbolo de la moneda.
         /// </summary>
-        public string? Símbolo { get; set; }
+        public string Símbolo { get; set; }
 
         /// <summary>
         /// Obtiene o establece la colección de tasas de cambio asociadas a esta moneda.
