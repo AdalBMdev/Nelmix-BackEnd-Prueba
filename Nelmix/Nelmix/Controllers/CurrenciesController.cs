@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Models;
 using Nelmix.Services;
 
@@ -11,16 +12,15 @@ namespace Nelmix.Controllers
     /// </summary>
     public class CurrenciesController : Controller
     {
-        private readonly CurrenciesService divisasService;
-        private readonly CasinoContext _context;
+        
+        private readonly ICurrenciesServices _currenciesServices;
 
         /// <summary>
         /// Constructor del controlador CurrenciesController.
         /// </summary>
-        public CurrenciesController(CasinoContext context)
+        public CurrenciesController(ICurrenciesServices currenciesServices)
         {
-            _context = context;
-            divisasService = new CurrenciesService(_context);
+            _currenciesServices = currenciesServices;
         }
 
 
@@ -34,7 +34,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                decimal result = await divisasService.ConvertCurrencyDollars(accountId);
+                decimal result = await _currenciesServices.ConvertCurrencyDollars(accountId);
 
                 if (result != 0)
                 {
@@ -63,7 +63,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                var resultado = await divisasService.BuyChipsInDollars(userId, typeFileId, quantity);
+                var resultado = await _currenciesServices.BuyChipsInDollars(userId, typeFileId, quantity);
 
                 if (resultado == "Compra de fichas exitosa.")
                 {
@@ -94,7 +94,7 @@ namespace Nelmix.Controllers
         {
             try
             {
-                var resultado = await divisasService.ExchangeChipsToCurrency(userId, typeFileId, currencyDestinationId, quantityFichas);
+                var resultado = await _currenciesServices.ExchangeChipsToCurrency(userId, typeFileId, currencyDestinationId, quantityFichas);
                 return Ok(resultado);
             }
 

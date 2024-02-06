@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Models;
 using System.Data;
 
@@ -8,7 +9,7 @@ namespace Nelmix.Services
     /// <summary>
     /// Clase que gestiona operaciones relacionadas con conversiones de moneda y fichas.
     /// </summary>
-    public class CurrenciesService 
+    public class CurrenciesService : ICurrenciesServices
     {
 
         private readonly CasinoContext _context;
