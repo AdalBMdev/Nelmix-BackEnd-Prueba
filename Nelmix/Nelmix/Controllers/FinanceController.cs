@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nelmix.Context;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
@@ -10,13 +11,15 @@ namespace Nelmix.Controllers
     public class FinanceController : Controller
     {
         private readonly FinanceService finanzasService;
+        private readonly CasinoContext _context;
 
         /// <summary>
         /// Constructor del controlador FinanceController.
         /// </summary>
-        public FinanceController()
+        public FinanceController(CasinoContext context)
         {
-            finanzasService = new FinanceService();
+            _context = context;
+            finanzasService = new FinanceService(_context);
         }
 
         /// <summary>
@@ -25,33 +28,30 @@ namespace Nelmix.Controllers
         /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
         /// <returns>Un ActionResult que contiene el estado financiero del usuario. </returns>
         [HttpGet("obtener-estado-financiero")]
-        public IActionResult GetFinancialStatement(int userId)
+        public async Task<IActionResult> GetFinancialStatement(int userId)
         {
-            decimal balance;
-            decimal earnings;
-            decimal losses;
-            int chips;
-
             try
             {
-                if (finanzasService.GetFinancialStatusUser(userId, out balance, out earnings, out losses, out chips))
+                var financialStatus = await finanzasService.GetFinancialStatusUser(userId);
+
+                if (financialStatus != null)
                 {
                     var statusFinancial = new
                     {
-                        SaldoActual = balance,
-                        Ganancias = earnings,
-                        Perdidas = losses,
-                        Fichas = chips
+                        SaldoActual = financialStatus.Balance,
+                        Ganancias = financialStatus.Earnings,
+                        Perdidas = financialStatus.Losses,
+                        Fichas = financialStatus.Chips
                     };
 
                     return Ok(statusFinancial);
                 }
+
                 return NotFound("No se encontró información financiera para el usuario.");
             }
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al obtener el estado financiero.");
+                return StatusCode(500, "Se produjo un error en el servidor al obtener el estado financiero." + ex.Message);
             }
         }
 

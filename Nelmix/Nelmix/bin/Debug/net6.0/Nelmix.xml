@@ -80,7 +80,7 @@
             Controlador para operaciones relacionadas con la economia del usuario
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.FinanceController.#ctor">
+        <member name="M:Nelmix.Controllers.FinanceController.#ctor(Nelmix.Context.CasinoContext)">
             <summary>
             Constructor del controlador FinanceController.
             </summary>
@@ -514,7 +514,7 @@
             Clase que gestiona operaciones relacionadas con el estado financiero de los usuarios, como la obtención de saldos, ganancias, pérdidas y fichas.
             </summary>
         </member>
-        <member name="M:Nelmix.Services.FinanceService.GetFinancialStatusUser(System.Int32,System.Decimal@,System.Decimal@,System.Decimal@,System.Int32@)">
+        <member name="M:Nelmix.Services.FinanceService.GetFinancialStatusUser(System.Int32)">
             <summary>
             Obtiene el estado financiero de un usuario, incluyendo su saldo actual, ganancias, pérdidas y cantidad de fichas.
             </summary>
