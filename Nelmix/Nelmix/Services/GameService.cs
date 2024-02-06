@@ -96,82 +96,53 @@ namespace Nelmix.Services
         /// <param name="userId">Identificador del usuario.</param>
         /// <param name="juegoId">Identificador del juego.</param>
         /// <returns>True si el usuario ha excedido el límite de pérdida, de lo contrario, False.</returns>
-        public bool VerifyLoseLimit(int userId, int juegoId)
+        public async Task<bool> VerifyLoseLimit(int userId, int juegoId)
         {
             try
             {
-                var chain = new Connection();
-                double limitLost = 10000.00;
+                decimal limitePerdida = 10000.00M;
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("VerificarLimitePerdidaEnJuego", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
-                        cmd.Parameters.AddWithValue("@juego_id", juegoId);
-                        cmd.Parameters.AddWithValue("@limite_perdida", limitLost);
+                var perdidas = await _context.ApuestasUsuarios
+                    .Where(a => a.UsuarioId == userId && a.JuegoId == juegoId)
+                    .SumAsync(a => (decimal?)a.CantidadPerdida) ?? 0;
 
-                        SqlParameter limitePerdidaExcedido = new SqlParameter("@excedido", SqlDbType.Bit)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(limitePerdidaExcedido);
+                bool excedido = perdidas >= limitePerdida;
 
-                        cmd.ExecuteNonQuery();
-
-                        bool Limit = Convert.ToBoolean(limitePerdidaExcedido.Value);
-                        return Limit;
-                    }
-                }
+                return excedido;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
+                // Manejar y registrar el error aquí
                 throw new Exception("Error al verificar límite de pérdida en el juego", ex);
             }
         }
 
+
         /// <summary>
-        /// Verifica si un usuario ha excedido el límite de pérdida en un juego específico.
+        /// Verifica si un usuario ha excedido el límite de ganancia en un juego específico.
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="juegoId">Identificador del juego.</param>
-        /// <returns>True si el usuario ha excedido el límite de pérdida, de lo contrario, False.</returns>
-        public bool VerifyGainLimit(int userId)
+        /// <returns>True si el usuario ha excedido el límite de ganancia, de lo contrario, False.</returns>
+        public async Task<bool> VerifyGainLimit(int userId)
         {
             try
             {
-                var chain = new Connection();
-                double limitGain = 25000.00;
+                decimal limiteGanancia = 25000.00M;
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("VerificarLimiteGanancia", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
-                        cmd.Parameters.AddWithValue("@limite_ganancia", limitGain);
+                var ganancias = await _context.ApuestasUsuarios
+                    .Where(a => a.UsuarioId == userId)
+                    .SumAsync(a => (decimal?)a.CantidadGanada) ?? 0;
 
-                        SqlParameter limitePerdidaExcedido = new SqlParameter("@excedido", SqlDbType.Bit)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(limitePerdidaExcedido);
+                bool limiteExcedido = ganancias >= limiteGanancia;
 
-                        cmd.ExecuteNonQuery();
-
-                        bool Limit = Convert.ToBoolean(limitePerdidaExcedido.Value);
-                        return Limit;
-                    }
-                }
+                return limiteExcedido;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
                 throw new Exception("Error al verificar límite de ganancia", ex);
             }
         }
+
 
         /// <summary>
         /// Gestiona el juego de un usuario, actualizando las fichas y el estado de victoria en la base de datos.
@@ -239,12 +210,12 @@ namespace Nelmix.Services
                     return false;
                 }
 
-                if (VerifyGainLimit(usuarioId))
+                if (!await VerifyGainLimit(usuarioId))
                 {
                     return false;
                 }
 
-                if (VerifyLoseLimit(usuarioId, juegoId))
+                if (!await VerifyLoseLimit(usuarioId, juegoId))
                 {
                     return false;
                 }
