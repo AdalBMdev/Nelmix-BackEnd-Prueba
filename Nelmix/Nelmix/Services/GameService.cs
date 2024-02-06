@@ -60,42 +60,35 @@ namespace Nelmix.Services
         /// <param name="greenChips">Cantidad de fichas verdes.</param>
         /// <param name="blackChips">Cantidad de fichas negras.</param>
         /// <returns>True si el usuario tiene suficientes fichas, de lo contrario, False.</returns>
-        public bool VerifyAvailabilityFiches(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        public async Task<bool> VerifyAvailabilityFiches(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
         {
             try
             {
-                var chain = new Connection();
+                var fichasDisponibles = await _context.Fichas
+                    .Where(f => f.UsuarioId == userId &&
+                                (f.TipoFichaId == 1 && redChips > 0 ||
+                                 f.TipoFichaId == 2 && yellowChips > 0 ||
+                                 f.TipoFichaId == 3 && greenChips > 0 ||
+                                 f.TipoFichaId == 4 && blackChips > 0))
+                    .GroupBy(f => f.TipoFichaId)
+                    .Select(g => new { TipoFichaId = g.Key, CantidadDisponible = g.Sum(f => f.CantidadDisponible) })
+                    .ToDictionaryAsync(f => f.TipoFichaId, f => f.CantidadDisponible);
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("VerificarDisponibilidadFichas", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
-                        cmd.Parameters.AddWithValue("@fichas_rojas", redChips);
-                        cmd.Parameters.AddWithValue("@fichas_amarillas", yellowChips);
-                        cmd.Parameters.AddWithValue("@fichas_verdes", greenChips);
-                        cmd.Parameters.AddWithValue("@fichas_negras", blackChips);
+                bool fichasSuficientes =
+                    (!fichasDisponibles.ContainsKey(1) || (fichasDisponibles.ContainsKey(1) && redChips <= fichasDisponibles[1])) &&
+                    (!fichasDisponibles.ContainsKey(2) || (fichasDisponibles.ContainsKey(2) && yellowChips <= fichasDisponibles[2])) &&
+                    (!fichasDisponibles.ContainsKey(3) || (fichasDisponibles.ContainsKey(3) && greenChips <= fichasDisponibles[3])) &&
+                    (!fichasDisponibles.ContainsKey(4) || (fichasDisponibles.ContainsKey(4) && blackChips <= fichasDisponibles[4]));
 
-                        SqlParameter chipsFound = new SqlParameter("@fichasEncontradas", SqlDbType.Bit)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(chipsFound);
 
-                        cmd.ExecuteNonQuery();
-
-                        bool chipsSufficient = Convert.ToBoolean(chipsFound.Value);
-                        return chipsSufficient;
-                    }
-                }
+                return fichasSuficientes;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
                 throw new Exception("Error al verificar disponibilidad de fichas", ex);
             }
         }
+
 
         /// <summary>
         /// Verifica si un usuario ha excedido el límite de pérdida en un juego específico.
@@ -236,12 +229,12 @@ namespace Nelmix.Services
         {
             try
             {
-                if (!(await VerifyEligibilityToPlay(usuarioId)))
+                if (!await VerifyEligibilityToPlay(usuarioId))
                 {
                     return false;
                 }
 
-                if (!VerifyAvailabilityFiches(usuarioId, redChips, yellowChips, greenChips, blackChips))
+                if (!await VerifyAvailabilityFiches(usuarioId, redChips, yellowChips, greenChips, blackChips))
                 {
                     return false;
                 }

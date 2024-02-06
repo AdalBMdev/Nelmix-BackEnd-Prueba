@@ -32,11 +32,13 @@ namespace Nelmix.Controllers
         /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayCraps")]
-        public IActionResult PlayCraps(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        public async Task<IActionResult> PlayCraps(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
         {
             int gameId = 1;
 
-            if (!gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId))
+            var verificationResult = await gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+
+            if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
@@ -64,11 +66,13 @@ namespace Nelmix.Controllers
         /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayTragaperras")]
-        public IActionResult PlayTragaperras(int userId, int redChips, int yellowChips, int greenChips, int blackChips )
+        public async Task<IActionResult> PlayTragaperras(int userId, int redChips, int yellowChips, int greenChips, int blackChips )
         {
             int gameId = 2;
 
-            if (!gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId))
+            var verificationResult = await gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+
+            if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
@@ -89,12 +93,14 @@ namespace Nelmix.Controllers
         /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayBlackjack")]
-        public IActionResult PlayBlackjack(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        public async Task<IActionResult> PlayBlackjack(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
         {
 
             int gameId = 3;
 
-            if (!gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId))
+            var verificationResult = await gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+
+            if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
