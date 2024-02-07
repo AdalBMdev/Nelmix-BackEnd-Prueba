@@ -9,18 +9,17 @@
             Controlador para operaciones relacionadas con cuentas bancarias.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.BankAccountController.#ctor">
+        <member name="M:Nelmix.Controllers.BankAccountController.#ctor(Nelmix.Interfaces.IBankAccountService)">
             <summary>
             Constructor del controlador BankAccountController.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.BankAccountController.CreateBankAccount(System.Int32,System.Int32,System.Decimal)">
+        <member name="M:Nelmix.Controllers.BankAccountController.CreateBankAccount(System.Int32,System.Int32)">
             <summary>
             Crea una cuenta bancaria para un usuario.
             </summary>
             <param name="userId">Identificador del usuario. Ejemplo: 1</param>
             <param name="monedaId">Identificador de la moneda. Ejemplo: 2</param>
-            <param name="saldo">Saldo inicial de la cuenta. Ejemplo: 1000.50</param>
             <returns>Un ActionResult que indica si la cuenta bancaria se creó con éxito.</returns>
         </member>
         <member name="M:Nelmix.Controllers.BankAccountController.DeleteBankAccount(System.Int32,System.Int32)">
@@ -45,7 +44,7 @@
             Controlador para operaciones relacionadas con divisas
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.CurrenciesController.#ctor">
+        <member name="M:Nelmix.Controllers.CurrenciesController.#ctor(Nelmix.Interfaces.ICurrenciesServices)">
             <summary>
             Constructor del controlador CurrenciesController.
             </summary>
@@ -66,13 +65,13 @@
             <param name="quantity">Cantidad de fichas a comprar. Ejemplo: 10</param>
             <returns>Un ActionResult que indica si la compra de fichas en dólares se realizó con éxito.</returns>
         </member>
-        <member name="M:Nelmix.Controllers.CurrenciesController.ExchangeChipsToCurrency(System.Int32,System.Int32,System.String,System.Int32)">
+        <member name="M:Nelmix.Controllers.CurrenciesController.ExchangeChipsToCurrency(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
             Realiza el intercambio de fichas por una moneda específica menos dolares.
             </summary>
             <param name="userId">Identificador del usuario. Ejemplo: 1</param>
             <param name="typeFileId">Identificador del tipo de ficha. Ejemplo: 1</param>
-            <param name="currencyDestination">Moneda de destino para el intercambio(Nombre especifico de la moneda). Ejemplo: Peso dominicano</param>
+            <param name="currencyDestinationId">Id de la moneda de destino para el intercambio. Ejemplo: 2</param>
             <param name="quantityFichas">Cantidad de fichas a intercambiar. Ejemplo: 10</param>
             <returns>Un ActionResult que indica si el intercambio de fichas a moneda se realizó con éxito.</returns>
         </member>
@@ -81,7 +80,7 @@
             Controlador para operaciones relacionadas con la economia del usuario
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.FinanceController.#ctor">
+        <member name="M:Nelmix.Controllers.FinanceController.#ctor(Nelmix.Interfaces.IFinanceService)">
             <summary>
             Constructor del controlador FinanceController.
             </summary>
@@ -105,7 +104,7 @@
             Controlador para operaciones relacionadas con juegos de casino.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.GameController.#ctor">
+        <member name="M:Nelmix.Controllers.GameController.#ctor(Nelmix.Interfaces.IGameService)">
             <summary>
             Constructor del controlador GameController.
             </summary>
@@ -148,12 +147,12 @@
             Controlador para operaciones relacionadas con Usuario.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.UserController.#ctor">
+        <member name="M:Nelmix.Controllers.UserController.#ctor(Nelmix.Interfaces.IUserService)">
             <summary>
             Constructor del controlador UserController.
             </summary>
         </member>
-        <member name="M:Nelmix.Controllers.UserController.Register(Nelmix.Models.Usuario)">
+        <member name="M:Nelmix.Controllers.UserController.RegisterAsync(Nelmix.Models.Usuario)">
             <summary>
             Registra un nuevo usuario.
             </summary>
@@ -182,7 +181,7 @@
             Asigna un adulto responsable a un usuario menor.
             </summary>
             <param name="mailUserMinor">Correo electrónico del usuario menor.  Ejemplo: userMinor@gmail.com</param>
-            <param name="nameAdult">Nombre del adulto responsable.  Ejemplo: john</param>
+            <param name="mailUserAdult">Correo electrónico del adulto responsable.  Ejemplo: userAdult@gmail.com</param>
             <returns>Un ActionResult que indica el resultado de la operación.</returns>
         </member>
         <member name="M:Nelmix.Controllers.UserController.DesactivateUser(System.Int32)">
@@ -453,7 +452,7 @@
             Clase que proporciona servicios relacionados con cuentas bancarias, como la creación, eliminación y adición de saldo a las cuentas bancarias de los usuarios.
             </summary>
         </member>
-        <member name="M:Nelmix.Services.BankAccountService.CreateBankAccount(System.Int32,System.Int32,System.Decimal)">
+        <member name="M:Nelmix.Services.BankAccountService.CreateBankAccount(System.Int32,System.Int32)">
             <summary>
             Crea una nueva cuenta bancaria para un usuario con un saldo inicial y una moneda específica.
             </summary>
@@ -500,13 +499,13 @@
             <param name="quantity">Cantidad de fichas a comprar.</param>
             <returns>Un mensaje indicando si la compra de fichas fue exitosa o un mensaje de error.</returns>
         </member>
-        <member name="M:Nelmix.Services.CurrenciesService.ExchangeChipsToCurrency(System.Int32,System.Int32,System.String,System.Int32)">
+        <member name="M:Nelmix.Services.CurrenciesService.ExchangeChipsToCurrency(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
             Intercambia fichas por una moneda específica para un usuario.
             </summary>
             <param name="userId">Identificador del usuario.</param>
             <param name="typeFileId">Identificador del tipo de ficha.</param>
-            <param name="currencyDestination">Moneda de destino para la conversión.</param>
+            <param name="currencyDestinationId">Moneda de destino para la conversión.</param>
             <param name="quantityFichas">Cantidad de fichas a convertir.</param>
             <returns>Un mensaje indicando si la conversión de fichas fue exitosa o un mensaje de error.</returns>
         </member>
@@ -515,7 +514,7 @@
             Clase que gestiona operaciones relacionadas con el estado financiero de los usuarios, como la obtención de saldos, ganancias, pérdidas y fichas.
             </summary>
         </member>
-        <member name="M:Nelmix.Services.FinanceService.GetFinancialStatusUser(System.Int32,System.Decimal@,System.Decimal@,System.Decimal@,System.Int32@)">
+        <member name="M:Nelmix.Services.FinanceService.GetFinancialStatusUser(System.Int32)">
             <summary>
             Obtiene el estado financiero de un usuario, incluyendo su saldo actual, ganancias, pérdidas y cantidad de fichas.
             </summary>
@@ -565,11 +564,10 @@
         </member>
         <member name="M:Nelmix.Services.GameService.VerifyGainLimit(System.Int32)">
             <summary>
-            Verifica si un usuario ha excedido el límite de pérdida en un juego específico.
+            Verifica si un usuario ha excedido el límite de ganancia en un juego específico.
             </summary>
             <param name="userId">Identificador del usuario.</param>
-            <param name="juegoId">Identificador del juego.</param>
-            <returns>True si el usuario ha excedido el límite de pérdida, de lo contrario, False.</returns>
+            <returns>True si el usuario ha excedido el límite de ganancia, de lo contrario, False.</returns>
         </member>
         <member name="M:Nelmix.Services.GameService.ManageUserGame(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean,System.Int32)">
             <summary>
@@ -660,10 +658,10 @@
             Asigna un adulto responsable a un usuario menor.
             </summary>
             <param name="mailUserMinor">Correo electrónico del usuario menor.</param>
-            <param name="nameAdult">Nombre del adulto responsable.</param>
+            <param name="mailUserAdult">Correo electrónico del adulto responsable.</param>
             <returns>Una tupla que contiene un valor booleano (True si la asignación fue exitosa) y un mensaje de texto.</returns>
         </member>
-        <member name="M:Nelmix.Services.UserService.ChangeUserStatusInactive(System.Int32)">
+        <member name="M:Nelmix.Services.UserService.ChangeUserStatusInactiveAsync(System.Int32)">
             <summary>
             Cambia el estado de un usuario a inactivo.
             </summary>
@@ -675,22 +673,6 @@
             </summary>
             <param name="inputString">Cadena de entrada que se convertirá en hash.</param>
             <returns>El hash SHA-256 de la cadena de entrada.</returns>
-        </member>
-        <member name="T:Connection">
-            <summary>
-            Clase que proporciona la cadena de conexión a la base de datos SQL Server desde la configuración de la aplicación.
-            </summary>
-        </member>
-        <member name="M:Connection.#ctor">
-            <summary>
-            Constructor de la clase que inicializa la cadena de conexión desde la configuración de la aplicación.
-            </summary>
-        </member>
-        <member name="M:Connection.getCadenaSQL">
-            <summary>
-            Obtiene la cadena de conexión a la base de datos SQL Server.
-            </summary>
-            <returns>La cadena de conexión a la base de datos.</returns>
         </member>
     </members>
 </doc>

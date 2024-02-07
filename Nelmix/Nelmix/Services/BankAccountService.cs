@@ -1,37 +1,41 @@
-﻿using System.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Nelmix.Context;
+using Nelmix.Interfaces;
+using Nelmix.Models;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace Nelmix.Services
 {
-    /// <summary>
-    /// Clase que proporciona servicios relacionados con cuentas bancarias, como la creación, eliminación y adición de saldo a las cuentas bancarias de los usuarios.
-    /// </summary>
-    public class BankAccountService
+    public class BankAccountService : IBankAccountService
     {
+
+        private readonly CasinoContext _context;
+
+        public BankAccountService (CasinoContext context)
+        {
+            _context = context;
+        }
+
         /// <summary>
         /// Crea una nueva cuenta bancaria para un usuario con un saldo inicial y una moneda específica.
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
         /// <param name="currencyId">Identificador de la moneda.</param>
-        /// <param name="balance">Saldo inicial de la cuenta.</param>
         /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
-        public bool CreateBankAccount(int userId, int currencyId, decimal balance)
+        public async Task<bool> CreateBankAccount(int userId, int currencyId)
         {
-            var chain = new Connection();
-
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+            var newBankAccount = new CuentasBancaria
             {
-                SqlCommand cmd = new SqlCommand("sp_CrearCuentaBancaria", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                UserId = userId,
+                MonedaId = currencyId,
+                Saldo = 0
+            };
 
-                cmd.Parameters.AddWithValue("@user_id", userId);
-                cmd.Parameters.AddWithValue("@moneda_id", currencyId);
-                cmd.Parameters.AddWithValue("@saldo", balance);
+            _context.CuentasBancarias.Add(newBankAccount);
+            await _context.SaveChangesAsync();
 
-                cn.Open();
-                cmd.ExecuteNonQuery();
-                return true;
-            }
+            return true;
         }
 
         /// <summary>
@@ -40,23 +44,22 @@ namespace Nelmix.Services
         /// <param name="cuentaId">Identificador de la cuenta bancaria.</param>
         /// <param name="userId">Identificador del usuario.</param>
         /// <returns>True si la cuenta bancaria se elimina con éxito, de lo contrario, False.</returns>
-        public bool DeleteBankAccount(int cuentaId, int userId)
+        public async Task<bool> DeleteBankAccount(int cuentaId, int userId)
         {
-            var chain = new Connection();
+            var bankAccountToDelete = await _context.CuentasBancarias
+                .FirstOrDefaultAsync(account => account.CuentaId == cuentaId && account.UserId == userId);
 
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+            if (bankAccountToDelete != null)
             {
-                SqlCommand cmd = new SqlCommand("sp_EliminarCuentaBancaria", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                _context.CuentasBancarias.Remove(bankAccountToDelete);
+                await _context.SaveChangesAsync();
 
-                cmd.Parameters.AddWithValue("@cuenta_id", cuentaId);
-                cmd.Parameters.AddWithValue("@user_id", userId);
-
-                cn.Open();
-                cmd.ExecuteNonQuery();
                 return true;
             }
+
+            return false;
         }
+
 
         /// <summary>
         /// Agrega saldo a una cuenta bancaria de un usuario en una moneda específica.
@@ -65,28 +68,22 @@ namespace Nelmix.Services
         /// <param name="currencyId">Identificador de la moneda.</param>
         /// <param name="balance">Saldo a agregar a la cuenta bancaria.</param>
         /// <returns>True si se agrega saldo con éxito, de lo contrario, False.</returns>
-        public bool AddBankAccountBalance(int userId, int currencyId, decimal balance)
+        public async Task<bool> AddBankAccountBalance(int userId, int currencyId, decimal balance)
         {
-            var chain = new Connection();
+            var bankAccountToUpdate = await _context.CuentasBancarias
+                .FirstOrDefaultAsync(account => account.UserId == userId && account.MonedaId == currencyId);
 
-            using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+            if (bankAccountToUpdate != null)
             {
+                bankAccountToUpdate.Saldo += balance;
+                await _context.SaveChangesAsync();
 
-                SqlCommand cmd = new SqlCommand("AñadirSaldoACuentaBancaria", cn);
-
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@usuario_id", userId);
-                cmd.Parameters.AddWithValue("@moneda_id", currencyId);
-                cmd.Parameters.AddWithValue("@monto", balance);
-
-                cn.Open();
-                int rowsAffected = cmd.ExecuteNonQuery();
-
-                return rowsAffected > 0;
-
+                return true;
             }
-           
+
+            return false;
         }
+
     }
 }
 

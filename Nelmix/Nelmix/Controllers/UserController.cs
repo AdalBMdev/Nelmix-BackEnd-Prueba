@@ -1,23 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Models;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
 {
-
-    /// <summary>
-    /// Controlador para operaciones relacionadas con Usuario.
-    /// </summary>
     public class UserController : Controller
     {
-        private readonly UserService usuarioService;
-
-        /// <summary>
-        /// Constructor del controlador UserController.
-        /// </summary>
-        public UserController()
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
         {
-            usuarioService = new UserService();
+            _userService = userService;
         }
 
         /// <summary>
@@ -26,12 +20,15 @@ namespace Nelmix.Controllers
         /// <param name="oUsuario">Objeto de tipo Usuario que contiene los datos del usuario a registrar.</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Register")]
-        public IActionResult Register(Usuario oUsuario)
+        public async Task<IActionResult> RegisterAsync(Usuario oUsuario)
         {
 
             try
             {
-                if (usuarioService.RegisterUser(oUsuario))
+
+                bool registrationResult = await _userService.RegisterUser(oUsuario);
+
+                if (registrationResult)
                 {
                     return Ok("Usuario registrado exitosamente.");
                 }
@@ -54,12 +51,13 @@ namespace Nelmix.Controllers
         /// <param name="password">Contraseña del usuario. Ejemplo: 123</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Login")]
-        public IActionResult Login(string email, string password) // Obtiene un objeto tipo UsuarioLogin que contiene email y contraseña
+        public async Task<IActionResult> Login(string email, string password)
         {
-
             try
             {
-                if (usuarioService.Login(email, password))
+                bool loginResult = await _userService.Login(email, password);
+
+                if (loginResult)
                 {
                     return Ok("Inicio de sesión exitoso.");
                 }
@@ -68,13 +66,12 @@ namespace Nelmix.Controllers
                     return BadRequest("Correo o contraseña incorrectos. Por favor, inténtalo de nuevo.");
                 }
             }
-
             catch (Exception ex)
             {
-                return StatusCode(500, "Error interno del servidor: " + ex.Message);
+                return StatusCode(500, "Error interno del servidor: " + ex.Message );
             }
-
         }
+
 
         /// <summary>
         /// Cambia la contraseña de un usuario.
@@ -84,38 +81,40 @@ namespace Nelmix.Controllers
         /// <param name="newPassword">Nueva contraseña para el usuario. Ejemplo: 1234</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("ChangePassword")]
-        public IActionResult ChangePassword(string email, string password, string newPassword) // Obtiene un objeto tipo CambiarContraseñaRequest
+        public async Task<IActionResult> ChangePassword(string email, string password, string newPassword)
         {
             try
             {
-                if (usuarioService.ChangePassword(email, password, newPassword))
+                (bool success, string message) = await _userService.ChangePassword(email, password, newPassword);
+
+                if (success)
                 {
                     return Ok("Contraseña cambiada exitosamente.");
                 }
                 else
                 {
-                    return BadRequest("La contraseña actual es incorrecta. Por favor, inténtalo de nuevo.");
+                    return BadRequest(message);
                 }
             }
-           
             catch (Exception ex)
             {
                 return StatusCode(500, "Error interno del servidor: " + ex.Message);
             }
         }
 
+
         /// <summary>
         /// Asigna un adulto responsable a un usuario menor.
         /// </summary>
         /// <param name="mailUserMinor">Correo electrónico del usuario menor.  Ejemplo: userMinor@gmail.com</param>
-        /// <param name="nameAdult">Nombre del adulto responsable.  Ejemplo: john</param>
+        /// <param name="mailUserAdult">Correo electrónico del adulto responsable.  Ejemplo: userAdult@gmail.com</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPut("AsignarAdulto")]
-        public IActionResult AsignarAdultoResponsable(string mailUserMinor, string nameAdult)
+        public async Task<IActionResult> AsignarAdultoResponsable(string mailUserMinor, string mailUserAdult)
         {
             try
             {
-                (bool registrado, string mensaje) = usuarioService.AssignAdultResponsible(mailUserMinor, nameAdult);
+                (bool registrado, string mensaje) = await _userService.AssignAdultResponsible(mailUserMinor, mailUserAdult);
 
                 if (registrado)
                 {
@@ -126,13 +125,12 @@ namespace Nelmix.Controllers
                     return BadRequest(mensaje);
                 }
             }
-
             catch (Exception ex)
             {
-                return StatusCode(500, "Error interno del servidor: " + ex.Message);
+                return StatusCode(500, "Error interno del servidor: " + ex.Message );
             }
-
         }
+
 
         /// <summary>
         /// Desactiva un usuario.
@@ -140,11 +138,11 @@ namespace Nelmix.Controllers
         /// <param name="userId">Identificador del usuario a desactivar. Ejemplo: 1</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPut("desactivar-usuario")]
-        public IActionResult DesactivateUser(int userId)
+        public async Task<IActionResult> DesactivateUser(int userId)
         {
             try
             {
-                usuarioService.ChangeUserStatusInactive(userId);
+                await _userService.ChangeUserStatusInactiveAsync(userId);
                 return Ok("Usuario desactivado exitosamente.");
             }
 
@@ -152,7 +150,7 @@ namespace Nelmix.Controllers
             {
                 return StatusCode(500, "Error interno del servidor: " + ex.Message);
             }
-
         }
+
     }
 }

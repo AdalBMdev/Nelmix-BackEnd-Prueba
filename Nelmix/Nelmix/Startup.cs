@@ -1,13 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration; // Importa el espacio de nombres de configuración
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.EntityFrameworkCore;
 using Nelmix.Context;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
-using System.IO;
+using Nelmix.Configuration;
 
 namespace Nelmix
 {
@@ -30,6 +25,7 @@ namespace Nelmix
 
             // Otros servicios
             services.AddControllers();
+            services.GetDependencyInjections();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
