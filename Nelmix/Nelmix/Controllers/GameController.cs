@@ -1,22 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
 {
-
-    /// <summary>
-    /// Controlador para operaciones relacionadas con juegos de casino.
-    /// </summary>
     public class GameController : Controller
     {
-        private readonly GameService gameService;
 
-        /// <summary>
-        /// Constructor del controlador GameController.
-        /// </summary>
-        public GameController()
+        private readonly IGameService _gameService;
+
+        public GameController(IGameService gameService)
         {
-            gameService = new GameService();
+            _gameService = gameService;
         }
 
         /// <summary>
@@ -29,16 +25,18 @@ namespace Nelmix.Controllers
         /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayCraps")]
-        public IActionResult PlayCraps(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        public async Task<IActionResult> PlayCraps(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
         {
             int gameId = 1;
 
-            if (!gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId))
+            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+
+            if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
 
-            var (victory, resultMessage) = gameService.PlayCraps();
+            var (victory, resultMessage) = _gameService.PlayCraps();
             bool finalVictory = victory ?? false; 
 
             if (victory == null)
@@ -46,7 +44,7 @@ namespace Nelmix.Controllers
                 return BadRequest("No se ha determinado una victoria o derrota.");
             }
 
-            gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, finalVictory, gameId);
+            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, finalVictory, gameId);
 
             return Ok(resultMessage);
         }
@@ -61,17 +59,19 @@ namespace Nelmix.Controllers
         /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayTragaperras")]
-        public IActionResult PlayTragaperras(int userId, int redChips, int yellowChips, int greenChips, int blackChips )
+        public async Task<IActionResult> PlayTragaperras(int userId, int redChips, int yellowChips, int greenChips, int blackChips )
         {
             int gameId = 2;
 
-            if (!gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId))
+            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+        
+            if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
 
-            var (victory, resultMessage) = gameService.PlayTragaperras();
-            gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
+            var (victory, resultMessage) = _gameService.PlayTragaperras();
+            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
 
             return Ok(resultMessage);
         }
@@ -86,18 +86,20 @@ namespace Nelmix.Controllers
         /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayBlackjack")]
-        public IActionResult PlayBlackjack(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        public async Task<IActionResult> PlayBlackjack(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
         {
 
             int gameId = 3;
 
-            if (!gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId))
+            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+
+            if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
 
-            var (victory, resultMessage) = gameService.PlayBlackjack();
-            gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
+            var (victory, resultMessage) = _gameService.PlayBlackjack();
+            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
 
             return Ok(resultMessage);
         }

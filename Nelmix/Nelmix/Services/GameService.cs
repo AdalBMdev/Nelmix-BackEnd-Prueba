@@ -1,52 +1,53 @@
-﻿using System.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Nelmix.Context;
+using Nelmix.Interfaces;
+using System.Data;
 using System.Data.SqlClient;
 
 
 namespace Nelmix.Services
 {
-    /// <summary>
-    /// Clase que gestiona operaciones relacionadas con juegos, como la verificación de elegibilidad para jugar, la disponibilidad de fichas y los límites de pérdida y ganancia.
-    /// </summary>
-    public class GameService
+    public class GameService : IGameService
     {
+
+        private readonly CasinoContext _context;
+
+        public GameService(CasinoContext context)
+        {
+            _context = context;
+        }
         /// <summary>
         /// Verifica si un usuario es elegible para jugar.
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
-        public bool VerifyEligibilityToPlay(int userId)
+        public async Task<bool> VerifyEligibilityToPlay(int userId)
         {
             try
             {
-                var chain = new Connection();
+                var usuario = await _context.Usuarios
+                    .Where(u => u.UserId == userId)
+                    .FirstOrDefaultAsync();
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
+                if (usuario != null)
                 {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("VerificarElegibilidadParaJugar", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
+                    int edad = usuario.Edad;
+                    int adultoAsignadoId = usuario.AdultoAsignadoId;
 
-                        SqlParameter elegible = new SqlParameter("@esElegible", SqlDbType.Bit)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(elegible);
+                    bool esElegible = edad >= 21 || adultoAsignadoId != 0;
 
-                        cmd.ExecuteNonQuery();
-
-                        bool esElegible = Convert.ToBoolean(elegible.Value);
-                        return esElegible;
-                    }
+                    return esElegible;
+                }
+                else
+                {
+                    throw new Exception("Usuario no encontrado");
                 }
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                // Aquí puedes registrar la excepción en un sistema de registro o lanzar una excepción personalizada
-                // para manejarla en un nivel superior si es necesario.
-                throw new Exception("Error al verificar elegibilidad para jugar", ex);
+                throw new Exception("Error al verificar elegibilidad para jugar" + ex.Message);
             }
         }
+
 
         /// <summary>
         /// Verifica si un usuario tiene suficientes fichas disponibles para jugar.
@@ -57,42 +58,35 @@ namespace Nelmix.Services
         /// <param name="greenChips">Cantidad de fichas verdes.</param>
         /// <param name="blackChips">Cantidad de fichas negras.</param>
         /// <returns>True si el usuario tiene suficientes fichas, de lo contrario, False.</returns>
-        public bool VerifyAvailabilityFiches(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        public async Task<bool> VerifyAvailabilityFiches(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
         {
             try
             {
-                var chain = new Connection();
+                var fichasDisponibles = await _context.Fichas
+                    .Where(f => f.UsuarioId == userId &&
+                                (f.TipoFichaId == 1 && redChips > 0 ||
+                                 f.TipoFichaId == 2 && yellowChips > 0 ||
+                                 f.TipoFichaId == 3 && greenChips > 0 ||
+                                 f.TipoFichaId == 4 && blackChips > 0))
+                    .GroupBy(f => f.TipoFichaId)
+                    .Select(g => new { TipoFichaId = g.Key, CantidadDisponible = g.Sum(f => f.CantidadDisponible) })
+                    .ToDictionaryAsync(f => f.TipoFichaId, f => f.CantidadDisponible);
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("VerificarDisponibilidadFichas", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
-                        cmd.Parameters.AddWithValue("@fichas_rojas", redChips);
-                        cmd.Parameters.AddWithValue("@fichas_amarillas", yellowChips);
-                        cmd.Parameters.AddWithValue("@fichas_verdes", greenChips);
-                        cmd.Parameters.AddWithValue("@fichas_negras", blackChips);
+                bool fichasSuficientes =
+                    (!fichasDisponibles.ContainsKey(1) || (fichasDisponibles.ContainsKey(1) && redChips <= fichasDisponibles[1])) &&
+                    (!fichasDisponibles.ContainsKey(2) || (fichasDisponibles.ContainsKey(2) && yellowChips <= fichasDisponibles[2])) &&
+                    (!fichasDisponibles.ContainsKey(3) || (fichasDisponibles.ContainsKey(3) && greenChips <= fichasDisponibles[3])) &&
+                    (!fichasDisponibles.ContainsKey(4) || (fichasDisponibles.ContainsKey(4) && blackChips <= fichasDisponibles[4]));
 
-                        SqlParameter chipsFound = new SqlParameter("@fichasEncontradas", SqlDbType.Bit)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(chipsFound);
 
-                        cmd.ExecuteNonQuery();
-
-                        bool chipsSufficient = Convert.ToBoolean(chipsFound.Value);
-                        return chipsSufficient;
-                    }
-                }
+                return fichasSuficientes;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                throw new Exception("Error al verificar disponibilidad de fichas", ex);
+                throw new Exception("Error al verificar disponibilidad de fichas" + ex.Message);
             }
         }
+
 
         /// <summary>
         /// Verifica si un usuario ha excedido el límite de pérdida en un juego específico.
@@ -100,82 +94,53 @@ namespace Nelmix.Services
         /// <param name="userId">Identificador del usuario.</param>
         /// <param name="juegoId">Identificador del juego.</param>
         /// <returns>True si el usuario ha excedido el límite de pérdida, de lo contrario, False.</returns>
-        public bool VerifyLoseLimit(int userId, int juegoId)
+        public async Task<bool> VerifyLoseLimit(int userId, int juegoId)
         {
             try
             {
-                var chain = new Connection();
-                double limitLost = 10000.00;
+                decimal limitePerdida = 10000.00M;
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("VerificarLimitePerdidaEnJuego", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
-                        cmd.Parameters.AddWithValue("@juego_id", juegoId);
-                        cmd.Parameters.AddWithValue("@limite_perdida", limitLost);
+                var perdidas = await _context.ApuestasUsuarios
+                    .Where(a => a.UsuarioId == userId && a.JuegoId == juegoId)
+                    .SumAsync(a => (decimal?)a.CantidadPerdida) ?? 0;
 
-                        SqlParameter limitePerdidaExcedido = new SqlParameter("@excedido", SqlDbType.Bit)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(limitePerdidaExcedido);
+                bool excedido = perdidas >= limitePerdida;
 
-                        cmd.ExecuteNonQuery();
-
-                        bool Limit = Convert.ToBoolean(limitePerdidaExcedido.Value);
-                        return Limit;
-                    }
-                }
+                return excedido;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                throw new Exception("Error al verificar límite de pérdida en el juego", ex);
+                // Manejar y registrar el error aquí
+                throw new Exception("Error al verificar límite de pérdida en el juego" + ex.Message);
             }
         }
+
 
         /// <summary>
-        /// Verifica si un usuario ha excedido el límite de pérdida en un juego específico.
+        /// Verifica si un usuario ha excedido el límite de ganancia en un juego específico.
         /// </summary>
         /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="juegoId">Identificador del juego.</param>
-        /// <returns>True si el usuario ha excedido el límite de pérdida, de lo contrario, False.</returns>
-        public bool VerifyGainLimit(int userId)
+        /// <returns>True si el usuario ha excedido el límite de ganancia, de lo contrario, False.</returns>
+        public async Task<bool> VerifyGainLimit(int userId)
         {
             try
             {
-                var chain = new Connection();
-                double limitGain = 25000.00;
+                decimal limiteGanancia = 25000.00M;
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("VerificarLimiteGanancia", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
-                        cmd.Parameters.AddWithValue("@limite_ganancia", limitGain);
+                var ganancias = await _context.ApuestasUsuarios
+                    .Where(a => a.UsuarioId == userId)
+                    .SumAsync(a => (decimal?)a.CantidadGanada) ?? 0;
 
-                        SqlParameter limitePerdidaExcedido = new SqlParameter("@excedido", SqlDbType.Bit)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(limitePerdidaExcedido);
+                bool limiteExcedido = ganancias >= limiteGanancia;
 
-                        cmd.ExecuteNonQuery();
-
-                        bool Limit = Convert.ToBoolean(limitePerdidaExcedido.Value);
-                        return Limit;
-                    }
-                }
+                return limiteExcedido;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                throw new Exception("Error al verificar límite de ganancia", ex);
+                throw new Exception("Error al verificar límite de ganancia" + ex.Message);
             }
         }
+
 
         /// <summary>
         /// Gestiona el juego de un usuario, actualizando las fichas y el estado de victoria en la base de datos.
@@ -188,36 +153,23 @@ namespace Nelmix.Services
         /// <param name="victory">Indica si el usuario ha ganado el juego.</param>
         /// <param name="gameId">Identificador del juego.</param>
         /// <returns>True si la gestión del juego se realiza con éxito, de lo contrario, False.</returns>
-        public bool ManageUserGame(int userId, int redChips, int yellowChips, int greenChips, int blackChips, bool victory, int gameId)
+        public async Task<bool> ManageUserGame(int userId, int redChips, int yellowChips, int greenChips, int blackChips, bool victory, int gameId)
         {
             try
             {
-                var chain = new Connection();
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC GestionarJuegoUsuario @usuario_id={0}, @fichas_rojas={1}, @fichas_amarillas={2}, @fichas_verdes={3}, @fichas_negras={4}, @victoria={5}, @juego_id={6}",
+                    userId, redChips, yellowChips, greenChips, blackChips, victory ? 1 : 0, gameId);
 
-                using (SqlConnection cn = new SqlConnection(chain.getCadenaSQL()))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("GestionarJuegoUsuario", cn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@usuario_id", userId);
-                        cmd.Parameters.AddWithValue("@fichas_rojas", redChips);
-                        cmd.Parameters.AddWithValue("@fichas_amarillas", yellowChips);
-                        cmd.Parameters.AddWithValue("@fichas_verdes", greenChips);
-                        cmd.Parameters.AddWithValue("@fichas_negras", blackChips);
-                        cmd.Parameters.AddWithValue("@victoria", victory);
-                        cmd.Parameters.AddWithValue("@juego_id", gameId);
 
-                        cmd.ExecuteNonQuery();
-                    }
-                }
                 return true;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                throw new Exception("Error al gestionar el juego del usuario", ex);
+                throw new Exception("Error al gestionar el juego del usuario" + ex.Message);
             }
         }
+
 
         /// <summary>
         /// Verifica si un usuario cumple con los requisitos para jugar, incluyendo elegibilidad, disponibilidad de fichas y límites de ganancia y pérdida.
@@ -229,26 +181,26 @@ namespace Nelmix.Services
         /// <param name="blackChips">Cantidad de fichas negras.</param>
         /// <param name="juegoId">Identificador del juego.</param>
         /// <returns>True si el usuario cumple con los requisitos para jugar, de lo contrario, False.</returns>
-        public bool VerifyPlay(int usuarioId, int redChips, int yellowChips, int greenChips, int blackChips, int juegoId)
+        public async Task<bool> VerifyPlay(int usuarioId, int redChips, int yellowChips, int greenChips, int blackChips, int juegoId)
         {
             try
             {
-                if (!VerifyEligibilityToPlay(usuarioId))
+                if (!await VerifyEligibilityToPlay(usuarioId))
                 {
                     return false;
                 }
 
-                if (!VerifyAvailabilityFiches(usuarioId, redChips, yellowChips, greenChips, blackChips))
+                if (!await VerifyAvailabilityFiches(usuarioId, redChips, yellowChips, greenChips, blackChips))
                 {
                     return false;
                 }
 
-                if (VerifyGainLimit(usuarioId))
+                if (await VerifyGainLimit(usuarioId))
                 {
                     return false;
                 }
 
-                if (VerifyLoseLimit(usuarioId, juegoId))
+                if (await VerifyLoseLimit(usuarioId, juegoId))
                 {
                     return false;
                 }

@@ -1,22 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nelmix.Context;
+using Nelmix.Interfaces;
 using Nelmix.Services;
 
 namespace Nelmix.Controllers
 {
 
-    /// <summary>
-    /// Controlador para operaciones relacionadas con la economia del usuario
-    /// </summary>
     public class FinanceController : Controller
     {
-        private readonly FinanceService finanzasService;
+        private readonly IFinanceService _finanzasService;
 
-        /// <summary>
-        /// Constructor del controlador FinanceController.
-        /// </summary>
-        public FinanceController()
+        public FinanceController(IFinanceService finanzasService)
         {
-            finanzasService = new FinanceService();
+            _finanzasService = finanzasService;
         }
 
         /// <summary>
@@ -25,33 +21,30 @@ namespace Nelmix.Controllers
         /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
         /// <returns>Un ActionResult que contiene el estado financiero del usuario. </returns>
         [HttpGet("obtener-estado-financiero")]
-        public IActionResult GetFinancialStatement(int userId)
+        public async Task<IActionResult> GetFinancialStatement(int userId)
         {
-            decimal balance;
-            decimal earnings;
-            decimal losses;
-            int chips;
-
             try
             {
-                if (finanzasService.GetFinancialStatusUser(userId, out balance, out earnings, out losses, out chips))
+                var financialStatus = await _finanzasService.GetFinancialStatusUser(userId);
+
+                if (financialStatus != null)
                 {
                     var statusFinancial = new
                     {
-                        SaldoActual = balance,
-                        Ganancias = earnings,
-                        Perdidas = losses,
-                        Fichas = chips
+                        SaldoActual = financialStatus.Balance,
+                        Ganancias = financialStatus.Earnings,
+                        Perdidas = financialStatus.Losses,
+                        Fichas = financialStatus.Chips
                     };
 
                     return Ok(statusFinancial);
                 }
+
                 return NotFound("No se encontró información financiera para el usuario.");
             }
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al obtener el estado financiero.");
+                return StatusCode(500, "Se produjo un error en el servidor al obtener el estado financiero." + ex.Message);
             }
         }
 
@@ -61,12 +54,11 @@ namespace Nelmix.Controllers
         /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
         /// <returns>Un ActionResult que contiene una lista de ganancias y pérdidas por juego.</returns>
         [HttpGet("ganancias-y-perdidas-por-juego")]
-        public IActionResult ObtenerGananciasYPérdidasPorJuego(int userId)
+        public async Task<IActionResult> ObtenerGananciasYPérdidasPorJuego(int userId)
         {
-
             try
             {
-                var resultados = finanzasService.GetProfitAndLossFromGaming(userId);
+                var resultados = await _finanzasService.GetProfitAndLossFromGaming(userId);
 
                 if (resultados == null || resultados.Count == 0)
                 {
@@ -75,13 +67,11 @@ namespace Nelmix.Controllers
 
                 return Ok(resultados);
             }
-
             catch (Exception ex)
             {
-                // Maneja y registra el error aquí
-                return StatusCode(500, "Se produjo un error en el servidor al obtener ganancias y perdidas por juego.");
+                return StatusCode(500, "Se produjo un error en el servidor al obtener ganancias y pérdidas por juego: " + ex.Message);
             }
-
         }
+
     }
 }
