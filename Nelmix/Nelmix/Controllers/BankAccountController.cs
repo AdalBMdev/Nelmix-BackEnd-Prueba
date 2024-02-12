@@ -70,6 +70,7 @@ namespace Nelmix.Controllers
         [HttpDelete("EliminarCuentaBancaria")]
         public async Task<IActionResult> DeleteBankAccount(int cuentaId, int userId)
         {
+
             try
             {
                 bool result = await _bankAccountService.DeleteBankAccount(cuentaId, userId);
@@ -90,18 +91,31 @@ namespace Nelmix.Controllers
         }
 
         /// <summary>
-        /// Añade saldo a una cuenta bancaria.
+        /// Añade saldo a una cuenta bancaria para un usuario.
         /// </summary>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <param name="currencyId">Identificador de la moneda. Ejemplo: 2</param>
-        /// <param name="balance">Saldo a añadir a la cuenta. Ejemplo: 50000</param>
-        /// <returns>Un ActionResult que indica si el saldo se añadió con éxito a la cuenta bancaria.</returns>
+        /// <param name="addBankAccountBalanceRequestDto">DTO que contiene la información para añadir saldo de la cuenta bancaria.</param>
+        /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
         [HttpPost("añadir-saldo")]
-        public async Task<IActionResult> AddBankAccountBalance(int userId, int currencyId, decimal balance)
+        public async Task<IActionResult> AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto)
         {
+
+            var validation = await _validationsManager.ValidateAsync(addBankAccountBalanceRequestDto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(addBankAccountBalanceRequestDto.UserId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta bancaria solicitada");
+            }
+
             try
             {
-                bool result = await _bankAccountService.AddBankAccountBalance(userId, currencyId, balance);
+                bool result = await _bankAccountService.AddBankAccountBalance(addBankAccountBalanceRequestDto);
 
                 if (result)
                 {

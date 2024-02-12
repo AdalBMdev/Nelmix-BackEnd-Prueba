@@ -6,7 +6,7 @@
         public class CreateBankAccountRequestDto
         {
             public int UserId { get; set; }
-            public int MonedaId { get; set; }
+            public int CurrencyId { get; set; }
 
         }
 

@@ -10,6 +10,8 @@ namespace Nelmix.Configuration
         public static void ValidatorsInjections(this IServiceCollection services)
         {
             services.AddScoped<IValidator<CreateBankAccountRequestDto>, CreateBankAccountValidator>();
+            services.AddScoped<IValidator<AddBankAccountBalanceRequestDto>, UpdateBankAccountValidator>();
+
         }
     }
 }

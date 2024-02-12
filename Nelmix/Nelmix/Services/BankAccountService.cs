@@ -28,7 +28,7 @@ namespace Nelmix.Services
             var newBankAccount = new CuentasBancaria
             {
                 UserId = createBankAccount.UserId,
-                MonedaId = createBankAccount.MonedaId,
+                MonedaId = createBankAccount.CurrencyId,
                 Saldo = 0
             };
 
@@ -63,20 +63,18 @@ namespace Nelmix.Services
 
 
         /// <summary>
-        /// Agrega saldo a una cuenta bancaria de un usuario en una moneda específica.
+        /// Añade saldo a una cuenta bancaria para un usuario.
         /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="currencyId">Identificador de la moneda.</param>
-        /// <param name="balance">Saldo a agregar a la cuenta bancaria.</param>
-        /// <returns>True si se agrega saldo con éxito, de lo contrario, False.</returns>
-        public async Task<bool> AddBankAccountBalance(int userId, int currencyId, decimal balance)
+        /// <param name="addBankAccountBalanceRequestDto">DTO que contiene la información para añadir saldo de la cuenta bancaria.</param>
+        /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
+        public async Task<bool> AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto)
         {
             var bankAccountToUpdate = await _context.CuentasBancarias
-                .FirstOrDefaultAsync(account => account.UserId == userId && account.MonedaId == currencyId);
+                .FirstOrDefaultAsync(account => account.UserId == addBankAccountBalanceRequestDto.UserId && account.MonedaId == addBankAccountBalanceRequestDto.CurrencyId);
 
             if (bankAccountToUpdate != null)
             {
-                bankAccountToUpdate.Saldo += balance;
+                bankAccountToUpdate.Saldo += addBankAccountBalanceRequestDto.Saldo;
                 await _context.SaveChangesAsync();
 
                 return true;

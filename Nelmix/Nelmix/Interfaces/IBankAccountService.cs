@@ -7,7 +7,7 @@ namespace Nelmix.Interfaces
     {
         Task<bool> CreateBankAccount(CreateBankAccountRequestDto createBankAccount);
         Task<bool> DeleteBankAccount(int accountId, int userId);
-        Task<bool> AddBankAccountBalance(int userId, int currencyId, decimal balance);
+        Task<bool> AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto);
 
     }
 }

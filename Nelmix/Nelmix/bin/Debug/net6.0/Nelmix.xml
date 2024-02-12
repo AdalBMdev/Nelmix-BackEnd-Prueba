@@ -19,14 +19,12 @@
             <param name="userId">Identificador del usuario. Ejemplo: 1</param>
             <returns>Un ActionResult que indica si la cuenta bancaria se eliminó con éxito.</returns>
         </member>
-        <member name="M:Nelmix.Controllers.BankAccountController.AddBankAccountBalance(System.Int32,System.Int32,System.Decimal)">
+        <member name="M:Nelmix.Controllers.BankAccountController.AddBankAccountBalance(Nelmix.DTO.BankAccountDTO.AddBankAccountBalanceRequestDto)">
             <summary>
-            Añade saldo a una cuenta bancaria.
+            Añade saldo a una cuenta bancaria para un usuario.
             </summary>
-            <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-            <param name="currencyId">Identificador de la moneda. Ejemplo: 2</param>
-            <param name="balance">Saldo a añadir a la cuenta. Ejemplo: 50000</param>
-            <returns>Un ActionResult que indica si el saldo se añadió con éxito a la cuenta bancaria.</returns>
+            <param name="addBankAccountBalanceRequestDto">DTO que contiene la información para añadir saldo de la cuenta bancaria.</param>
+            <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
         </member>
         <member name="M:Nelmix.Controllers.CurrenciesController.ConvertCurrencyDollars(System.Int32)">
             <summary>
@@ -155,14 +153,12 @@
             <param name="userId">Identificador del usuario.</param>
             <returns>True si la cuenta bancaria se elimina con éxito, de lo contrario, False.</returns>
         </member>
-        <member name="M:Nelmix.Services.BankAccountService.AddBankAccountBalance(System.Int32,System.Int32,System.Decimal)">
+        <member name="M:Nelmix.Services.BankAccountService.AddBankAccountBalance(Nelmix.DTO.BankAccountDTO.AddBankAccountBalanceRequestDto)">
             <summary>
-            Agrega saldo a una cuenta bancaria de un usuario en una moneda específica.
+            Añade saldo a una cuenta bancaria para un usuario.
             </summary>
-            <param name="userId">Identificador del usuario.</param>
-            <param name="currencyId">Identificador de la moneda.</param>
-            <param name="balance">Saldo a agregar a la cuenta bancaria.</param>
-            <returns>True si se agrega saldo con éxito, de lo contrario, False.</returns>
+            <param name="addBankAccountBalanceRequestDto">DTO que contiene la información para añadir saldo de la cuenta bancaria.</param>
+            <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
         </member>
         <member name="M:Nelmix.Services.CurrenciesService.ConvertCurrencyDollars(System.Int32)">
             <summary>

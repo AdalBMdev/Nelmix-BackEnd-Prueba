@@ -10,15 +10,17 @@ namespace Nelmix.Validations
         public CreateBankAccountValidator()
         {
             RuleFor(account => account.UserId).NotEmpty();
-            RuleFor(account => account.MonedaId).NotEmpty();
+            RuleFor(account => account.CurrencyId).NotEmpty();
         }
     }
 
-    public class UpdateBankAccountValidator : AbstractValidator<CuentasBancaria>
+    public class UpdateBankAccountValidator : AbstractValidator<AddBankAccountBalanceRequestDto>
     {
         public UpdateBankAccountValidator()
         {
-            RuleFor(account => account.Saldo).GreaterThanOrEqualTo(0);
+            RuleFor(account => account.UserId).NotEmpty();
+            RuleFor(account => account.CurrencyId).NotEmpty();
+            RuleFor(account => account.Saldo).NotEmpty().GreaterThanOrEqualTo(0);
         }
     }
 

@@ -13,12 +13,19 @@ namespace Nelmix.Validations
         private readonly CasinoContext _context;
         private readonly Dictionary<Type, IValidator> _dictionary;
 
-        public ValidationsManager(CasinoContext context, IValidator<CreateBankAccountRequestDto> validatorBankAccountCreate)
+        public ValidationsManager(
+            CasinoContext context, 
+            IValidator<CreateBankAccountRequestDto> validatorBankAccountCreate,
+            IValidator<AddBankAccountBalanceRequestDto> validatorBankAccountSaldoUpdate
+
+            )
         {
             _context = context;
             _dictionary = new()
             {
-                { typeof(CreateBankAccountRequestDto), validatorBankAccountCreate }
+                { typeof(CreateBankAccountRequestDto), validatorBankAccountCreate },
+                { typeof(AddBankAccountBalanceRequestDto), validatorBankAccountSaldoUpdate }
+
             };
         }
 
