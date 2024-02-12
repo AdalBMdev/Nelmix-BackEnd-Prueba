@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Nelmix.Interfaces;
 using Nelmix.Services;
+using Nelmix.Validations;
+
 
 namespace Nelmix.Configuration
 {
@@ -13,6 +15,8 @@ namespace Nelmix.Configuration
             services.AddScoped<ICurrenciesServices, CurrenciesService>();
             services.AddScoped<IGameService, GameService>();
             services.AddScoped<IFinanceService, FinanceService>();
+            services.AddScoped<IValidationsManager, ValidationsManager>();
+            services.ValidatorsInjections();
         }
     }
 }

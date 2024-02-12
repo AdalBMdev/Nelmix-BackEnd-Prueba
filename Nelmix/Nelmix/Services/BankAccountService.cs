@@ -4,6 +4,7 @@ using Nelmix.Interfaces;
 using Nelmix.Models;
 using System.Data;
 using System.Data.SqlClient;
+using static Nelmix.DTO.BankAccountDTO;
 
 namespace Nelmix.Services
 {
@@ -20,15 +21,14 @@ namespace Nelmix.Services
         /// <summary>
         /// Crea una nueva cuenta bancaria para un usuario con un saldo inicial y una moneda específica.
         /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="currencyId">Identificador de la moneda.</param>
+        /// <param name="createBankAccount">DTO que contiene la información para la creación de la cuenta bancaria.</param>
         /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
-        public async Task<bool> CreateBankAccount(int userId, int currencyId)
+        public async Task<bool> CreateBankAccount(CreateBankAccountRequestDto createBankAccount)
         {
             var newBankAccount = new CuentasBancaria
             {
-                UserId = userId,
-                MonedaId = currencyId,
+                UserId = createBankAccount.UserId,
+                MonedaId = createBankAccount.MonedaId,
                 Saldo = 0
             };
 
@@ -37,6 +37,7 @@ namespace Nelmix.Services
 
             return true;
         }
+
 
         /// <summary>
         /// Elimina una cuenta bancaria de un usuario.

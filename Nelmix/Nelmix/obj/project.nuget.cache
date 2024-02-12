@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "Zy9sx2J/orSfswX8hKVlKHN5QApdymXp16ZNqzyG32Ih/r9/VmvOEYM8h4/G46Mu3Qe4wv66McjIaa2+FqWxxA==",
+  "dgSpecHash": "JRKDAwvmhDTXDJccK1ujZ9MGG0CnxKS2nrjT3u1hJLLiszWRHI8Gmyw6qcRFJJ06UB8mRBVIh44Wpwy9gCALKg==",
   "success": true,
   "projectFilePath": "C:\\Users\\Adal\\source\\repos\\Nelmix-BackEnd-Prueba\\Nelmix\\Nelmix\\Nelmix.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Adal\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\Adal\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
+    "C:\\Users\\Adal\\.nuget\\packages\\fluentvalidation\\11.9.0\\fluentvalidation.11.9.0.nupkg.sha512",
     "C:\\Users\\Adal\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\Adal\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\Adal\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",

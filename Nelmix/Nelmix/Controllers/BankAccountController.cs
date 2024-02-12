@@ -2,6 +2,7 @@
 using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Services;
+using static Nelmix.DTO.BankAccountDTO;
 
 namespace Nelmix.Controllers
 {
@@ -9,24 +10,40 @@ namespace Nelmix.Controllers
     public class BankAccountController : Controller
     {
         private readonly IBankAccountService _bankAccountService;
+        private readonly IValidationsManager _validationsManager;
 
-        public BankAccountController(IBankAccountService bankAccountService)
+        public BankAccountController(IBankAccountService bankAccountService, IValidationsManager validationsManager)
         {
             _bankAccountService = bankAccountService;
+            _validationsManager = validationsManager;
         }
 
         /// <summary>
-        /// Crea una cuenta bancaria para un usuario.
+        /// Crea una nueva cuenta bancaria para un usuario.
         /// </summary>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <param name="monedaId">Identificador de la moneda. Ejemplo: 2</param>
+        /// <param name="createBankAccount">DTO que contiene la información para la creación de la cuenta bancaria.</param>
         /// <returns>Un ActionResult que indica si la cuenta bancaria se creó con éxito.</returns>
         [HttpPost("CrearCuentaBancaria")]
-        public async Task<IActionResult> CreateBankAccount(int userId, int monedaId)
+        public async Task<IActionResult> CreateBankAccount(CreateBankAccountRequestDto createBankAccount)
         {
+
+            var validation = await _validationsManager.ValidateAsync(createBankAccount);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(createBankAccount.UserId);
+
+            if(accountExist)
+            {
+                return BadRequest("Ya existe una cuenta bancaria asignada a su usuario");
+            }
+
             try
             {
-                bool result = await _bankAccountService.CreateBankAccount(userId, monedaId);
+                bool result = await _bankAccountService.CreateBankAccount(createBankAccount);
 
 
                 if (result)
