@@ -40,15 +40,14 @@ namespace Nelmix.Services
 
 
         /// <summary>
-        /// Elimina una cuenta bancaria de un usuario.
+        /// Elimina una cuenta bancaria perteneciente a un usuario.
         /// </summary>
-        /// <param name="cuentaId">Identificador de la cuenta bancaria.</param>
-        /// <param name="userId">Identificador del usuario.</param>
+        /// <param name="deleteBankAccountRequestDto">DTO que contiene la información para la eliminacion de la cuenta bancaria.</param>
         /// <returns>True si la cuenta bancaria se elimina con éxito, de lo contrario, False.</returns>
-        public async Task<bool> DeleteBankAccount(int cuentaId, int userId)
+        public async Task<bool> DeleteBankAccount(DeleteBankAccountRequestDto deleteBankAccountRequestDto)
         {
             var bankAccountToDelete = await _context.CuentasBancarias
-                .FirstOrDefaultAsync(account => account.CuentaId == cuentaId && account.UserId == userId);
+                .FirstOrDefaultAsync(account => account.CuentaId == deleteBankAccountRequestDto.BankAccountId && account.UserId == deleteBankAccountRequestDto.UserId);
 
             if (bankAccountToDelete != null)
             {

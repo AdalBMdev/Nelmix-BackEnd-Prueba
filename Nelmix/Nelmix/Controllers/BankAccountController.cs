@@ -62,18 +62,31 @@ namespace Nelmix.Controllers
         }
 
         /// <summary>
-        /// Elimina una cuenta bancaria de un usuario.
+        /// Elimina una cuenta bancaria perteneciente a un usuario.
         /// </summary>
-        /// <param name="cuentaId">Identificador de la cuenta bancaria Ejemplo: 1.</param>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <returns>Un ActionResult que indica si la cuenta bancaria se eliminó con éxito.</returns>
+        /// <param name="deleteBankAccountRequestDto">DTO que contiene la información para la eliminacion de la cuenta bancaria.</param>
+        /// <returns>Un ActionResult que indica si la cuenta bancaria se creó con éxito.</returns>
         [HttpDelete("EliminarCuentaBancaria")]
-        public async Task<IActionResult> DeleteBankAccount(int cuentaId, int userId)
+        public async Task<IActionResult> DeleteBankAccount(DeleteBankAccountRequestDto deleteBankAccountRequestDto)
         {
+            var validation = await _validationsManager.ValidateAsync(deleteBankAccountRequestDto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(deleteBankAccountRequestDto.UserId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta bancaria solicitada");
+            }
+
 
             try
             {
-                bool result = await _bankAccountService.DeleteBankAccount(cuentaId, userId);
+                bool result = await _bankAccountService.DeleteBankAccount(deleteBankAccountRequestDto);
 
                 if (result)
                 {
@@ -94,7 +107,7 @@ namespace Nelmix.Controllers
         /// Añade saldo a una cuenta bancaria para un usuario.
         /// </summary>
         /// <param name="addBankAccountBalanceRequestDto">DTO que contiene la información para añadir saldo de la cuenta bancaria.</param>
-        /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
+        /// <returns>Un ActionResult que indica si la cuenta bancaria se creó con éxito.</returns>
         [HttpPost("añadir-saldo")]
         public async Task<IActionResult> AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto)
         {

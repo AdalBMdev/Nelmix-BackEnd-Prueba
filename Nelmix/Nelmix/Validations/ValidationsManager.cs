@@ -16,7 +16,9 @@ namespace Nelmix.Validations
         public ValidationsManager(
             CasinoContext context, 
             IValidator<CreateBankAccountRequestDto> validatorBankAccountCreate,
-            IValidator<AddBankAccountBalanceRequestDto> validatorBankAccountSaldoUpdate
+            IValidator<AddBankAccountBalanceRequestDto> validatorBankAccountSaldoUpdate,
+            IValidator<DeleteBankAccountRequestDto> validatorBankAccountDelete
+
 
             )
         {
@@ -24,7 +26,8 @@ namespace Nelmix.Validations
             _dictionary = new()
             {
                 { typeof(CreateBankAccountRequestDto), validatorBankAccountCreate },
-                { typeof(AddBankAccountBalanceRequestDto), validatorBankAccountSaldoUpdate }
+                { typeof(AddBankAccountBalanceRequestDto), validatorBankAccountSaldoUpdate },
+                { typeof(DeleteBankAccountRequestDto), validatorBankAccountDelete },
 
             };
         }

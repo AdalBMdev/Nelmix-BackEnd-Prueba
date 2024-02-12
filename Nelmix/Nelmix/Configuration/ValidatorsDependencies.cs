@@ -11,6 +11,7 @@ namespace Nelmix.Configuration
         {
             services.AddScoped<IValidator<CreateBankAccountRequestDto>, CreateBankAccountValidator>();
             services.AddScoped<IValidator<AddBankAccountBalanceRequestDto>, UpdateBankAccountValidator>();
+            services.AddScoped<IValidator<DeleteBankAccountRequestDto>, DeleteBankAccountValidator>();
 
         }
     }

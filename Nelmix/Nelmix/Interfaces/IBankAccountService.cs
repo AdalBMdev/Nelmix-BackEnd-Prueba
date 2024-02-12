@@ -6,7 +6,7 @@ namespace Nelmix.Interfaces
     public interface IBankAccountService
     {
         Task<bool> CreateBankAccount(CreateBankAccountRequestDto createBankAccount);
-        Task<bool> DeleteBankAccount(int accountId, int userId);
+        Task<bool> DeleteBankAccount(DeleteBankAccountRequestDto deleteBankAccountRequestDto);
         Task<bool> AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto);
 
     }

@@ -24,4 +24,12 @@ namespace Nelmix.Validations
         }
     }
 
+    public class DeleteBankAccountValidator : AbstractValidator<DeleteBankAccountRequestDto>
+    {
+        public DeleteBankAccountValidator()
+        {
+            RuleFor(account => account.UserId).NotEmpty();
+            RuleFor(account => account.BankAccountId).NotEmpty();
+        }
+    }
 }
