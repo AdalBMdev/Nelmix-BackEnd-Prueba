@@ -43,17 +43,8 @@ namespace Nelmix.Controllers
 
             try
             {
-                bool result = await _bankAccountService.CreateBankAccount(createBankAccount);
-
-
-                if (result)
-                {
-                    return Ok("Cuenta bancaria creada exitosamente.");
-                }
-                else
-                {
-                    return BadRequest("Error al crear la cuenta bancaria.");
-                }
+                await _bankAccountService.CreateBankAccount(createBankAccount);
+                return Ok("Cuenta bancaria creada exitosamente.");
             }
             catch (Exception ex)
             {
@@ -83,19 +74,10 @@ namespace Nelmix.Controllers
                 return BadRequest("No existe la cuenta bancaria solicitada");
             }
 
-
             try
             {
-                bool result = await _bankAccountService.DeleteBankAccount(deleteBankAccountRequestDto);
-
-                if (result)
-                {
-                    return Ok("Cuenta bancaria eliminada exitosamente.");
-                }
-                else
-                {
-                    return BadRequest("Error al eliminar la cuenta bancaria.");
-                }
+                await _bankAccountService.DeleteBankAccount(deleteBankAccountRequestDto);
+                return Ok("Cuenta bancaria eliminada exitosamente.");               
             }
             catch (Exception ex)
             {
@@ -128,14 +110,8 @@ namespace Nelmix.Controllers
 
             try
             {
-                bool result = await _bankAccountService.AddBankAccountBalance(addBankAccountBalanceRequestDto);
-
-                if (result)
-                {
-                    return Ok("Saldo añadido con éxito.");
-                }
-
-                return BadRequest("Error al añadir saldo a la cuenta bancaria.");
+                await _bankAccountService.AddBankAccountBalance(addBankAccountBalanceRequestDto);
+                return Ok("Saldo añadido con éxito.");
             }
 
             catch (Exception ex)

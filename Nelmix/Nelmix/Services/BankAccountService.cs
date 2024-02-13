@@ -23,7 +23,7 @@ namespace Nelmix.Services
         /// </summary>
         /// <param name="createBankAccount">DTO que contiene la información para la creación de la cuenta bancaria.</param>
         /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
-        public async Task<bool> CreateBankAccount(CreateBankAccountRequestDto createBankAccount)
+        public async Task CreateBankAccount(CreateBankAccountRequestDto createBankAccount)
         {
             var newBankAccount = new CuentasBancaria
             {
@@ -34,8 +34,6 @@ namespace Nelmix.Services
 
             _context.CuentasBancarias.Add(newBankAccount);
             await _context.SaveChangesAsync();
-
-            return true;
         }
 
 
@@ -44,20 +42,13 @@ namespace Nelmix.Services
         /// </summary>
         /// <param name="deleteBankAccountRequestDto">DTO que contiene la información para la eliminacion de la cuenta bancaria.</param>
         /// <returns>True si la cuenta bancaria se elimina con éxito, de lo contrario, False.</returns>
-        public async Task<bool> DeleteBankAccount(DeleteBankAccountRequestDto deleteBankAccountRequestDto)
+        public async Task DeleteBankAccount(DeleteBankAccountRequestDto deleteBankAccountRequestDto)
         {
             var bankAccountToDelete = await _context.CuentasBancarias
                 .FirstOrDefaultAsync(account => account.CuentaId == deleteBankAccountRequestDto.BankAccountId && account.UserId == deleteBankAccountRequestDto.UserId);
 
-            if (bankAccountToDelete != null)
-            {
                 _context.CuentasBancarias.Remove(bankAccountToDelete);
                 await _context.SaveChangesAsync();
-
-                return true;
-            }
-
-            return false;
         }
 
 
@@ -66,20 +57,13 @@ namespace Nelmix.Services
         /// </summary>
         /// <param name="addBankAccountBalanceRequestDto">DTO que contiene la información para añadir saldo de la cuenta bancaria.</param>
         /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
-        public async Task<bool> AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto)
+        public async Task AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto)
         {
             var bankAccountToUpdate = await _context.CuentasBancarias
                 .FirstOrDefaultAsync(account => account.UserId == addBankAccountBalanceRequestDto.UserId && account.MonedaId == addBankAccountBalanceRequestDto.CurrencyId);
 
-            if (bankAccountToUpdate != null)
-            {
-                bankAccountToUpdate.Saldo += addBankAccountBalanceRequestDto.Saldo;
+            bankAccountToUpdate.Saldo += addBankAccountBalanceRequestDto.Saldo;
                 await _context.SaveChangesAsync();
-
-                return true;
-            }
-
-            return false;
         }
 
     }
