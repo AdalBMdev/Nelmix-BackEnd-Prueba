@@ -21,20 +21,20 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Registra un nuevo usuario.
         /// </summary>
-        /// <param name="oUsuario">Objeto de tipo Usuario que contiene los datos del usuario a registrar.</param>
+        /// <param name="registerUsuario">Objeto de tipo Usuario que contiene los datos del usuario a registrar.</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Register")]
-        public async Task<IActionResult> RegisterUserAsync(RegisterUserRequestDto oUsuario)
+        public async Task<IActionResult> RegisterUserAsync(RegisterUserRequestDto registerUsuario)
         {
 
-            var validation = await _validationsManager.ValidateAsync(oUsuario);
+            var validation = await _validationsManager.ValidateAsync(registerUsuario);
 
             if (!validation.IsValid)
             {
                 return BadRequest(validation.Errors);
             }
 
-            var emailExist = await _validationsManager.ValidateEmailExistAsync(oUsuario.Email);
+            var emailExist = await _validationsManager.ValidateEmailExistAsync(registerUsuario.Email);
 
             if (emailExist)
             {
@@ -43,7 +43,7 @@ namespace Nelmix.Controllers
 
             try
             {
-                await _userService.RegisterUser(oUsuario);
+                await _userService.RegisterUser(registerUsuario);
                 return Ok("Usuario registrado exitosamente.");
             }
             
@@ -56,15 +56,29 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Inicia sesión de un usuario.
         /// </summary>
-        /// <param name="email">Correo electrónico del usuario. Ejemplo: john@gmail.com</param>
-        /// <param name="password">Contraseña del usuario. Ejemplo: 123</param>
+        /// <param name="loginUsuario">Un objeto con informacion para el login</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(LoginUserRequestDto loginUsuario)
         {
+
+            var validation = await _validationsManager.ValidateAsync(loginUsuario);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var emailExist = await _validationsManager.ValidateEmailExistAsync(loginUsuario.Email);
+
+            if (!emailExist)
+            {
+                return BadRequest("El email ingresado no tiene una cuenta en nuestro sistema");
+            }
+
             try
             {
-                bool loginResult = await _userService.Login(email, password);
+                bool loginResult = await _userService.Login(loginUsuario);
 
                 if (loginResult)
                 {

@@ -43,14 +43,13 @@ namespace Nelmix.Services
         /// <summary>
         /// Inicia sesión de un usuario utilizando su correo electrónico y contraseña.
         /// </summary>
-        /// <param name="email">Correo electrónico del usuario.</param>
-        /// <param name="password">Contraseña del usuario.</param>
+        /// <param name="usuario">Objeto Usuario que contiene los datos del usuario a login.</param>
         /// <returns>True si la sesión se inicia con éxito, de lo contrario, False.</returns>
-        public async Task<bool> Login(string email, string password)
+        public async Task<bool> Login(LoginUserRequestDto usuario)
         {
-            password = ConvertSha256(password);
+            usuario.Password = ConvertSha256(usuario.Password);
 
-            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email && u.Contraseña == password);
+            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == usuario.Email && u.Contraseña == usuario.Password);
 
             return user != null;
         }
