@@ -9,8 +9,8 @@ namespace Nelmix.Validations
     {
         public CreateBankAccountValidator()
         {
-            RuleFor(account => account.UserId).NotEmpty();
-            RuleFor(account => account.CurrencyId).NotEmpty();
+            RuleFor(account => account.UserId).NotEmpty().GreaterThan(0);
+            RuleFor(account => account.CurrencyId).NotEmpty().InclusiveBetween(1, 8);
         }
     }
 
@@ -18,8 +18,8 @@ namespace Nelmix.Validations
     {
         public UpdateBankAccountValidator()
         {
-            RuleFor(account => account.UserId).NotEmpty();
-            RuleFor(account => account.CurrencyId).NotEmpty();
+            RuleFor(account => account.UserId).NotEmpty().GreaterThan(0);
+            RuleFor(account => account.CurrencyId).NotEmpty().InclusiveBetween(1, 8);
             RuleFor(account => account.Saldo).NotEmpty().GreaterThanOrEqualTo(0);
         }
     }
@@ -28,8 +28,8 @@ namespace Nelmix.Validations
     {
         public DeleteBankAccountValidator()
         {
-            RuleFor(account => account.UserId).NotEmpty();
-            RuleFor(account => account.BankAccountId).NotEmpty();
+            RuleFor(account => account.UserId).NotEmpty().GreaterThan(0);
+            RuleFor(account => account.BankAccountId).NotEmpty().GreaterThan(0);
         }
     }
 }
