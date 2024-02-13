@@ -3,6 +3,7 @@ using Nelmix.DTOs;
 using Nelmix.Validations;
 using static Nelmix.DTOs.BankAccountDTO;
 using static Nelmix.DTOs.CurrenciesDTO;
+using static Nelmix.DTOs.GameDTO;
 using static Nelmix.DTOs.UserDTO;
 
 namespace Nelmix.Configuration
@@ -25,6 +26,10 @@ namespace Nelmix.Configuration
             services.AddScoped<IValidator<ConvertCurrencyDollarsRequestDto>, ConvertCurrencyDollarsValidator>();
             services.AddScoped<IValidator<BuyChipsInDollarsRequestDto>, BuyChipsInDollarsDollarsValidator>();
             services.AddScoped<IValidator<ExchangeChipsToCurrencyRequestDto>, ExchangeChipsToCurrencyValidator>();
+            //Game
+            services.AddScoped<IValidator<ManageUserGameRequestDto>, ManageUserGameValidator>();
+
+
 
 
 

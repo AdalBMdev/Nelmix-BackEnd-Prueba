@@ -6,6 +6,7 @@ using static Nelmix.DTOs.BankAccountDTO;
 using Microsoft.EntityFrameworkCore;
 using static Nelmix.DTOs.UserDTO;
 using static Nelmix.DTOs.CurrenciesDTO;
+using static Nelmix.DTOs.GameDTO;
 
 namespace Nelmix.Validations
 {
@@ -27,7 +28,9 @@ namespace Nelmix.Validations
             IValidator<DesactivateUserRequestDto> validatorDesactivateUser,
             IValidator<ConvertCurrencyDollarsRequestDto> validatorConvertCurrencyDollars,
             IValidator<BuyChipsInDollarsRequestDto> validatorBuyChipsInDollars,
-            IValidator<ExchangeChipsToCurrencyRequestDto> validatorExchangeChipsToCurrency
+            IValidator<ExchangeChipsToCurrencyRequestDto> validatorExchangeChipsToCurrency,
+            IValidator<ManageUserGameRequestDto> validatorManageUserGame
+
 
 
 
@@ -51,7 +54,8 @@ namespace Nelmix.Validations
                 { typeof(DesactivateUserRequestDto), validatorDesactivateUser },
                 { typeof(ConvertCurrencyDollarsRequestDto), validatorConvertCurrencyDollars },
                 { typeof(BuyChipsInDollarsRequestDto), validatorBuyChipsInDollars },
-                { typeof(ExchangeChipsToCurrencyRequestDto), validatorExchangeChipsToCurrency }
+                { typeof(ExchangeChipsToCurrencyRequestDto), validatorExchangeChipsToCurrency },
+                { typeof(ManageUserGameRequestDto), validatorManageUserGame }
             };
         }
 
@@ -143,6 +147,117 @@ namespace Nelmix.Validations
             }
 
             return false;
+        }
+
+        public async Task<bool> VerifyEligibilityToPlay(int userId)
+        {
+                var usuario = await _context.Usuarios
+                    .Where(u => u.UserId == userId)
+                    .FirstOrDefaultAsync();
+
+
+                    int edad = usuario.Edad;
+                    int adultoAsignadoId = usuario.AdultoAsignadoId;
+
+                    bool esElegible = edad >= 21 || adultoAsignadoId != 0;
+
+                    return esElegible;    
+        }
+
+        public async Task<bool> VerifyAvailabilityFiches(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        {
+            bool fichasSuficientes = true;
+
+            if (redChips > 0)
+            {
+                int redChipsDisponibles = await _context.Fichas
+                    .Where(f => f.UsuarioId == userId && f.TipoFichaId == 1)
+                    .SumAsync(f => f.CantidadDisponible);
+
+                fichasSuficientes &= (redChipsDisponibles >= redChips);
+            }
+
+            if (yellowChips > 0)
+            {
+                int yellowChipsDisponibles = await _context.Fichas
+                    .Where(f => f.UsuarioId == userId && f.TipoFichaId == 2)
+                    .SumAsync(f => f.CantidadDisponible);
+
+                fichasSuficientes &= (yellowChipsDisponibles >= yellowChips);
+            }
+
+            if (greenChips > 0)
+            {
+                int greenChipsDisponibles = await _context.Fichas
+                    .Where(f => f.UsuarioId == userId && f.TipoFichaId == 3)
+                    .SumAsync(f => f.CantidadDisponible);
+
+                fichasSuficientes &= (greenChipsDisponibles >= greenChips);
+            }
+
+            if (blackChips > 0)
+            {
+                int blackChipsDisponibles = await _context.Fichas
+                    .Where(f => f.UsuarioId == userId && f.TipoFichaId == 4)
+                    .SumAsync(f => f.CantidadDisponible);
+
+                fichasSuficientes &= (blackChipsDisponibles >= blackChips);
+            }
+
+            return fichasSuficientes;
+        }
+
+
+        public async Task<bool> VerifyLoseLimit(int userId, int juegoId)
+        {
+                decimal limitePerdida = 10000.00M;
+
+                var perdidas = await _context.ApuestasUsuarios
+                    .Where(a => a.UsuarioId == userId && a.JuegoId == juegoId)
+                    .SumAsync(a => (decimal?)a.CantidadPerdida) ?? 0;
+
+                bool excedido = perdidas >= limitePerdida;
+
+                return excedido;
+        }
+        public async Task<bool> VerifyGainLimit(int userId)
+        {
+                decimal limiteGanancia = 25000.00M;
+
+                var ganancias = await _context.ApuestasUsuarios
+                    .Where(a => a.UsuarioId == userId)
+                    .SumAsync(a => (decimal?)a.CantidadGanada) ?? 0;
+
+                bool limiteExcedido = ganancias >= limiteGanancia;
+
+                return limiteExcedido;
+        }
+
+        public async Task<bool> VerifyPlay(ManageUserGameRequestDto request)
+        {
+
+            if (!await VerifyEligibilityToPlay(request.UserId))
+            {
+                return false;
+            }
+
+            if (!await VerifyAvailabilityFiches(request.UserId, request.RedChips, request.YellowChips, request.GreenChips, request.BlackChips))
+            {
+                return false;
+            }
+
+            if (await VerifyGainLimit(request.UserId))
+            {
+                return false;
+            }
+
+            if (await VerifyLoseLimit(request.UserId, request.GameId))
+            {
+                return false;
+            }
+
+            return true;
+
         }
 
     }

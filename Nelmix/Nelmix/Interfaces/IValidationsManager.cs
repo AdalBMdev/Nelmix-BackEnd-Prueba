@@ -1,5 +1,6 @@
 ﻿using FluentValidation.Results;
 using static Nelmix.DTOs.CurrenciesDTO;
+using static Nelmix.DTOs.GameDTO;
 
 namespace Nelmix.Interfaces
 {
@@ -15,6 +16,8 @@ namespace Nelmix.Interfaces
         Task<bool> ValidateBankAccountCurrencyIsDolarAndSufficientBalance(BuyChipsInDollarsRequestDto buyChipsInDollarsRequestDto);
 
         Task<bool> ValidateChipsSuficientAsync(int userId, int typeFileId, int quantity);
+
+        Task<bool> VerifyPlay(ManageUserGameRequestDto request);
 
 
     }
