@@ -27,21 +27,11 @@ namespace Nelmix.Services
         /// <param name="victory">Indica si el usuario ha ganado el juego.</param>
         /// <param name="gameId">Identificador del juego.</param>
         /// <returns>True si la gestión del juego se realiza con éxito, de lo contrario, False.</returns>
-        public async Task<bool> ManageUserGame(ManageUserGameRequestDto request)
+        public async Task ManageUserGame(ManageUserGameRequestDto request)
         {
-            try
-            {
-                await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC GestionarJuegoUsuario @usuario_id={0}, @fichas_rojas={1}, @fichas_amarillas={2}, @fichas_verdes={3}, @fichas_negras={4}, @victoria={5}, @juego_id={6}",
-                    request.UserId, request.RedChips, request.YellowChips, request.GreenChips, request.BlackChips, request.Victory ? 1 : 0, request.GameId);
-
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al gestionar el juego del usuario" + ex.Message);
-            }
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC GestionarJuegoUsuario @usuario_id={0}, @fichas_rojas={1}, @fichas_amarillas={2}, @fichas_verdes={3}, @fichas_negras={4}, @victoria={5}, @juego_id={6}",
+                request.UserId, request.RedChips, request.YellowChips, request.GreenChips, request.BlackChips, request.Victory ? 1 : 0, request.GameId);
         }
 
         /// <summary>

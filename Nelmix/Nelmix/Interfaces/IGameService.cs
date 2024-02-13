@@ -4,8 +4,8 @@ using static Nelmix.DTOs.GameDTO;
 namespace Nelmix.Interfaces
 {
     public interface IGameService
-    { 
-        Task<bool> ManageUserGame(ManageUserGameRequestDto request);
+    {
+        Task ManageUserGame(ManageUserGameRequestDto request);
 
         (bool?, string) PlayCraps();
 

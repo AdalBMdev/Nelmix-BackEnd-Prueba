@@ -98,6 +98,7 @@ namespace Nelmix.Controllers
             }
 
             var (victory, resultMessage) = _gameService.PlayTragaperras();
+            request.Victory = victory;
             await _gameService.ManageUserGame(request);
 
             return Ok(resultMessage);
@@ -136,6 +137,7 @@ namespace Nelmix.Controllers
             }
 
             var (victory, resultMessage) = _gameService.PlayBlackjack();
+            request.Victory = victory;
             await _gameService.ManageUserGame(request);
 
             return Ok(resultMessage);
