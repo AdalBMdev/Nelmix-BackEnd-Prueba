@@ -7,5 +7,8 @@ namespace Nelmix.Interfaces
         Task<ValidationResult> ValidateAsync<T>(T entity);
 
         Task<bool> ValidateBankAccountExistAsync(int userId);
+
+        Task<bool> ValidateEmailExistAsync(string email);
+
     }
 }

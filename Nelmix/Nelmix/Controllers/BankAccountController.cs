@@ -2,7 +2,7 @@
 using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Services;
-using static Nelmix.DTO.BankAccountDTO;
+using static Nelmix.DTOs.BankAccountDTO;
 
 namespace Nelmix.Controllers
 {

@@ -3,15 +3,19 @@ using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Models;
 using Nelmix.Services;
+using static Nelmix.DTOs.UserDTO;
 
 namespace Nelmix.Controllers
 {
     public class UserController : Controller
     {
         private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly IValidationsManager _validationsManager;
+
+        public UserController(IUserService userService, IValidationsManager validationsManager)
         {
             _userService = userService;
+            _validationsManager = validationsManager;
         }
 
         /// <summary>
@@ -20,22 +24,27 @@ namespace Nelmix.Controllers
         /// <param name="oUsuario">Objeto de tipo Usuario que contiene los datos del usuario a registrar.</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Register")]
-        public async Task<IActionResult> RegisterAsync(Usuario oUsuario)
+        public async Task<IActionResult> RegisterUserAsync(RegisterUserRequestDto oUsuario)
         {
+
+            var validation = await _validationsManager.ValidateAsync(oUsuario);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var emailExist = await _validationsManager.ValidateEmailExistAsync(oUsuario.Email);
+
+            if (emailExist)
+            {
+                return BadRequest("Ya existe un usuario creado con este email");
+            }
 
             try
             {
-
-                bool registrationResult = await _userService.RegisterUser(oUsuario);
-
-                if (registrationResult)
-                {
-                    return Ok("Usuario registrado exitosamente.");
-                }
-                else
-                {
-                    return BadRequest("Error al registrar usuario.");
-                }
+                await _userService.RegisterUser(oUsuario);
+                return Ok("Usuario registrado exitosamente.");
             }
             
             catch (Exception ex)

@@ -4,7 +4,7 @@ using Nelmix.Interfaces;
 using Nelmix.Models;
 using System.Data;
 using System.Data.SqlClient;
-using static Nelmix.DTO.BankAccountDTO;
+using static Nelmix.DTOs.BankAccountDTO;
 
 namespace Nelmix.Services
 {

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Models;
+using static Nelmix.DTOs.UserDTO;
 
 namespace Nelmix.Services
 {
@@ -21,32 +22,23 @@ namespace Nelmix.Services
         /// </summary>
         /// <param name="usuario">Objeto Usuario que contiene los datos del usuario a registrar.</param>
         /// <returns>True si el registro fue exitoso, de lo contrario, False.</returns>
-        public async Task<bool> RegisterUser(Usuario usuario)
+        public async Task RegisterUser(RegisterUserRequestDto usuario)
         {
-                usuario.Contraseña = ConvertSha256(usuario.Contraseña);
+                usuario.Password = ConvertSha256(usuario.Password);
 
-                bool emailExists = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
-
-                if (!emailExists)
+                var newUser = new Usuario
                 {
-                    var newUser = new Usuario
-                    {
-                        Nombre = usuario.Nombre,
-                        Edad = usuario.Edad,
-                        Email = usuario.Email,
-                        Contraseña = usuario.Contraseña,
-                        EstadoId = 1,
-                        AdultoAsignadoId = 0
-                    };
+                    Nombre = usuario.Name,
+                    Edad = usuario.Age,
+                    Email = usuario.Email,
+                    Contraseña = usuario.Password,
+                    EstadoId = 1,
+                    AdultoAsignadoId = 0
+                };
 
-                    _context.Usuarios.Add(newUser);
-                    await _context.SaveChangesAsync();
-
-                    return true;
-                }
-
-                return false;
-            }
+                _context.Usuarios.Add(newUser);
+                await _context.SaveChangesAsync();
+        }
 
         /// <summary>
         /// Inicia sesión de un usuario utilizando su correo electrónico y contraseña.

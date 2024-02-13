@@ -2,8 +2,9 @@
 using FluentValidation.Results;
 using Nelmix.Interfaces;
 using Nelmix.Context;
-using static Nelmix.DTO.BankAccountDTO;
+using static Nelmix.DTOs.BankAccountDTO;
 using Microsoft.EntityFrameworkCore;
+using static Nelmix.DTOs.UserDTO;
 
 namespace Nelmix.Validations
 {
@@ -17,7 +18,9 @@ namespace Nelmix.Validations
             CasinoContext context, 
             IValidator<CreateBankAccountRequestDto> validatorBankAccountCreate,
             IValidator<AddBankAccountBalanceRequestDto> validatorBankAccountSaldoUpdate,
-            IValidator<DeleteBankAccountRequestDto> validatorBankAccountDelete
+            IValidator<DeleteBankAccountRequestDto> validatorBankAccountDelete,
+            IValidator<RegisterUserRequestDto> validatorRegisterUser
+
 
 
             )
@@ -28,6 +31,7 @@ namespace Nelmix.Validations
                 { typeof(CreateBankAccountRequestDto), validatorBankAccountCreate },
                 { typeof(AddBankAccountBalanceRequestDto), validatorBankAccountSaldoUpdate },
                 { typeof(DeleteBankAccountRequestDto), validatorBankAccountDelete },
+                { typeof(RegisterUserRequestDto), validatorRegisterUser }
 
             };
         }
@@ -53,6 +57,13 @@ namespace Nelmix.Validations
             var accountExists = await _context.CuentasBancarias.AnyAsync(account => account.UserId == userId);
 
             return accountExists;
+        }
+
+        public async Task<bool> ValidateEmailExistAsync(string email)
+        {
+            var emailExists = await _context.Usuarios.AnyAsync(account => account.Email == email);
+
+            return emailExists;
         }
 
     }

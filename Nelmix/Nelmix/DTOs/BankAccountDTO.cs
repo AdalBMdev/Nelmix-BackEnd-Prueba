@@ -1,4 +1,4 @@
-﻿namespace Nelmix.DTO
+﻿namespace Nelmix.DTOs
 {
     public class BankAccountDTO
     {

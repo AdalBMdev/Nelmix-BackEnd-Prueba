@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using Nelmix.DTO;
+using Nelmix.DTOs;
 using Nelmix.Models;
-using static Nelmix.DTO.BankAccountDTO;
+using static Nelmix.DTOs.BankAccountDTO;
 
 namespace Nelmix.Validations
 {

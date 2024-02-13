@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using static Nelmix.DTO.BankAccountDTO;
+using static Nelmix.DTOs.BankAccountDTO;
 
 namespace Nelmix.Interfaces
 {
