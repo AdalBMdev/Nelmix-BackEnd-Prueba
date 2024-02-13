@@ -22,7 +22,8 @@ namespace Nelmix.Validations
             IValidator<RegisterUserRequestDto> validatorRegisterUser,
             IValidator<LoginUserRequestDto> validatorLoginUser,
             IValidator<ChangePasswordRequestDto> validatorChangePasswordUser,
-            IValidator<AssignAdultResponsableRequestDto> validatorAssignAdultValidator
+            IValidator<AssignAdultResponsableRequestDto> validatorAssignAdultValidator,
+            IValidator<DesactivateUserRequestDto> validatorDesactivateUser
 
 
 
@@ -39,7 +40,8 @@ namespace Nelmix.Validations
                 { typeof(RegisterUserRequestDto), validatorRegisterUser },
                 { typeof(LoginUserRequestDto), validatorLoginUser },
                 { typeof(ChangePasswordRequestDto), validatorChangePasswordUser },
-                { typeof(AssignAdultResponsableRequestDto), validatorAssignAdultValidator }
+                { typeof(AssignAdultResponsableRequestDto), validatorAssignAdultValidator },
+                { typeof(DesactivateUserRequestDto), validatorDesactivateUser }
 
             };
         }
@@ -86,6 +88,13 @@ namespace Nelmix.Validations
             var userMinorExists = await _context.Usuarios.AnyAsync(account => account.Email == email && account.Edad < 21);
 
             return userMinorExists;
+        }
+
+        public async Task<bool> ValidateUserExistAsync(int id)
+        {
+            var userExists = await _context.Usuarios.AnyAsync(account => account.UserId == id);
+
+            return userExists;
         }
 
     }

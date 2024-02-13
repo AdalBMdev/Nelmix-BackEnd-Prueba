@@ -9,6 +9,6 @@ namespace Nelmix.Interfaces
         Task<bool> Login(LoginUserRequestDto usuario);
         Task ChangePassword(ChangePasswordRequestDto changePasswordUsuario);
         Task AssignAdultResponsible(AssignAdultResponsableRequestDto usersEmails);
-        Task ChangeUserStatusInactiveAsync(int userId);
+        Task ChangeUserStatusInactiveAsync(DesactivateUserRequestDto usuario);
     }
 }

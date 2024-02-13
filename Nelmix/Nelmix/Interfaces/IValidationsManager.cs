@@ -9,6 +9,7 @@ namespace Nelmix.Interfaces
         Task<bool> ValidateEmailExistAsync(string email);
         Task<bool> ValidateAdultExistAsync(string email);
         Task<bool> ValidateUserIsMinorExistAsync(string email);
+        Task<bool> ValidateUserExistAsync(int id);
 
 
     }

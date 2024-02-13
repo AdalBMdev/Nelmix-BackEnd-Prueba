@@ -19,6 +19,8 @@ namespace Nelmix.Configuration
             services.AddScoped<IValidator<LoginUserRequestDto>, LoginUserValidator>();
             services.AddScoped<IValidator<ChangePasswordRequestDto>, ChangePasswordValidator>();
             services.AddScoped<IValidator<AssignAdultResponsableRequestDto>, AssignAdultValidator>();
+            services.AddScoped<IValidator<DesactivateUserRequestDto>, DesactivateUserValidator>();
+
 
 
 

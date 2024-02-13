@@ -30,5 +30,10 @@ namespace Nelmix.DTOs
             public string MailUserMinor { get; set; }
             public string MailUserAdult { get; set; }
         }
+
+        public class DesactivateUserRequestDto
+        {
+            public int UserId { get; set; }
+        }
     }
 }

@@ -97,20 +97,13 @@ namespace Nelmix.Services
         /// <summary>
         /// Cambia el estado de un usuario a inactivo.
         /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        public async Task ChangeUserStatusInactiveAsync(int userId)
+        /// <param name="usuario">Identificador del usuario.</param>
+        public async Task ChangeUserStatusInactiveAsync(DesactivateUserRequestDto usuario)
         {
-            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.UserId == usuario.UserId);
 
-            if (user != null)
-            {
-                user.EstadoId = 0;
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                throw new Exception("Usuario no encontrado.");
-            }
+            user.EstadoId = 0;
+            await _context.SaveChangesAsync();
         }
 
 

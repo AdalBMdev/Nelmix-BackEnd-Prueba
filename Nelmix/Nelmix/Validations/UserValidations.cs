@@ -42,5 +42,13 @@ namespace Nelmix.Validations
 
         }
     }
+
+    public class DesactivateUserValidator : AbstractValidator<DesactivateUserRequestDto>
+    {
+        public DesactivateUserValidator()
+        {
+           RuleFor(x => x.UserId).NotEmpty().GreaterThan(0);
+        }
+    }
 }
 

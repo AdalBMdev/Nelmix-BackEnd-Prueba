@@ -177,14 +177,28 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Desactiva un usuario.
         /// </summary>
-        /// <param name="userId">Identificador del usuario a desactivar. Ejemplo: 1</param>
+        /// <param name="usuario">Identificador del usuario a desactivar. Ejemplo: 1</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPut("desactivar-usuario")]
-        public async Task<IActionResult> DesactivateUser(int userId)
+        public async Task<IActionResult> DesactivateUser(DesactivateUserRequestDto usuario)
         {
+            var validation = await _validationsManager.ValidateAsync(usuario);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var user = await _validationsManager.ValidateUserExistAsync(usuario.UserId);
+
+            if (!user)
+            {
+                return BadRequest("El identificador del usuario ingresado no tiene una cuenta en nuestro sistema");
+            }
+
             try
             {
-                await _userService.ChangeUserStatusInactiveAsync(userId);
+                await _userService.ChangeUserStatusInactiveAsync(usuario);
                 return Ok("Usuario desactivado exitosamente.");
             }
 
