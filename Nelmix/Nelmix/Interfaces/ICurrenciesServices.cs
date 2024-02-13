@@ -1,8 +1,10 @@
-﻿namespace Nelmix.Interfaces
+﻿using static Nelmix.DTOs.CurrenciesDTO;
+
+namespace Nelmix.Interfaces
 {
     public interface ICurrenciesServices
     {
-        Task<decimal> ConvertCurrencyDollars(int accountId);
+        Task<decimal> ConvertCurrencyDollars(ConvertCurrencyDollarsRequestDto convertCurrencyDollarsRequestDto);
 
         Task<string> BuyChipsInDollars(int userId, int typeFileId, int quantity);
 

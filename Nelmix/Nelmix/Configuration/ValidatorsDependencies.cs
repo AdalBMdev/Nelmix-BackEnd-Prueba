@@ -2,6 +2,7 @@
 using Nelmix.DTOs;
 using Nelmix.Validations;
 using static Nelmix.DTOs.BankAccountDTO;
+using static Nelmix.DTOs.CurrenciesDTO;
 using static Nelmix.DTOs.UserDTO;
 
 namespace Nelmix.Configuration
@@ -20,6 +21,9 @@ namespace Nelmix.Configuration
             services.AddScoped<IValidator<ChangePasswordRequestDto>, ChangePasswordValidator>();
             services.AddScoped<IValidator<AssignAdultResponsableRequestDto>, AssignAdultValidator>();
             services.AddScoped<IValidator<DesactivateUserRequestDto>, DesactivateUserValidator>();
+            //Currencies
+            services.AddScoped<IValidator<ConvertCurrencyDollarsRequestDto>, ConvertCurrencyDollarsValidator>();
+
 
 
 

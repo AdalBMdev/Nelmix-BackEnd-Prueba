@@ -5,6 +5,7 @@ using Nelmix.Context;
 using static Nelmix.DTOs.BankAccountDTO;
 using Microsoft.EntityFrameworkCore;
 using static Nelmix.DTOs.UserDTO;
+using static Nelmix.DTOs.CurrenciesDTO;
 
 namespace Nelmix.Validations
 {
@@ -23,7 +24,9 @@ namespace Nelmix.Validations
             IValidator<LoginUserRequestDto> validatorLoginUser,
             IValidator<ChangePasswordRequestDto> validatorChangePasswordUser,
             IValidator<AssignAdultResponsableRequestDto> validatorAssignAdultValidator,
-            IValidator<DesactivateUserRequestDto> validatorDesactivateUser
+            IValidator<DesactivateUserRequestDto> validatorDesactivateUser,
+            IValidator<ConvertCurrencyDollarsRequestDto> validatorConvertCurrencyDollars
+
 
 
 
@@ -41,7 +44,8 @@ namespace Nelmix.Validations
                 { typeof(LoginUserRequestDto), validatorLoginUser },
                 { typeof(ChangePasswordRequestDto), validatorChangePasswordUser },
                 { typeof(AssignAdultResponsableRequestDto), validatorAssignAdultValidator },
-                { typeof(DesactivateUserRequestDto), validatorDesactivateUser }
+                { typeof(DesactivateUserRequestDto), validatorDesactivateUser },
+                { typeof(ConvertCurrencyDollarsRequestDto), validatorConvertCurrencyDollars }
 
             };
         }
@@ -61,12 +65,24 @@ namespace Nelmix.Validations
 
             throw new InvalidOperationException($"Validator not registered for type {typeof(T)}. Please register a validator for this type.");
         }
-
-        public async Task<bool> ValidateBankAccountExistAsync(int userId)
+        public async Task<bool> ValidateUserBankAccountExistAsync(int userId)
         {
             var accountExists = await _context.CuentasBancarias.AnyAsync(account => account.UserId == userId);
 
             return accountExists;
+        }
+
+        public async Task<bool> ValidateBankAccountExistAsync(int accountId)
+        {
+            var accountExists = await _context.CuentasBancarias.AnyAsync(account => account.CuentaId == accountId);
+
+            return accountExists;
+        public async Task<bool> ValidateBankAccountExistAsync(int accountId)
+        {
+            var accountExists = await _context.CuentasBancarias.AnyAsync(account => account.CuentaId == accountId);
+
+            return accountExists;
+        }
         }
 
         public async Task<bool> ValidateEmailExistAsync(string email)

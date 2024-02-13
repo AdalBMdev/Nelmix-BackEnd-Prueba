@@ -34,7 +34,7 @@ namespace Nelmix.Controllers
                 return BadRequest(validation.Errors);
             }
 
-            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(createBankAccount.UserId);
+            var accountExist = await _validationsManager.ValidateUserBankAccountExistAsync(createBankAccount.UserId);
 
             if(accountExist)
             {
@@ -60,6 +60,7 @@ namespace Nelmix.Controllers
         [HttpDelete("EliminarCuentaBancaria")]
         public async Task<IActionResult> DeleteBankAccount(DeleteBankAccountRequestDto deleteBankAccountRequestDto)
         {
+
             var validation = await _validationsManager.ValidateAsync(deleteBankAccountRequestDto);
 
             if (!validation.IsValid)
@@ -67,7 +68,7 @@ namespace Nelmix.Controllers
                 return BadRequest(validation.Errors);
             }
 
-            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(deleteBankAccountRequestDto.UserId);
+            var accountExist = await _validationsManager.ValidateUserBankAccountExistAsync(deleteBankAccountRequestDto.UserId);
 
             if (!accountExist)
             {
@@ -101,7 +102,7 @@ namespace Nelmix.Controllers
                 return BadRequest(validation.Errors);
             }
 
-            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(addBankAccountBalanceRequestDto.UserId);
+            var accountExist = await _validationsManager.ValidateUserBankAccountExistAsync(addBankAccountBalanceRequestDto.UserId);
 
             if (!accountExist)
             {

@@ -3,6 +3,8 @@ using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Models;
 using Nelmix.Services;
+using Nelmix.Validations;
+using static Nelmix.DTOs.CurrenciesDTO;
 
 namespace Nelmix.Controllers
 {
@@ -11,33 +13,43 @@ namespace Nelmix.Controllers
     {
         
         private readonly ICurrenciesServices _currenciesServices;
+        private readonly IValidationsManager _validationsManager;
 
-        public CurrenciesController(ICurrenciesServices currenciesServices)
+
+        public CurrenciesController(ICurrenciesServices currenciesServices, IValidationsManager validationsManager)
         {
             _currenciesServices = currenciesServices;
+            _validationsManager = validationsManager;
         }
 
 
         /// <summary>
         /// Convierte la moneda de una cuenta a dólares.
         /// </summary>
-        /// <param name="accountId">Identificador de la cuenta de banco. Ejemplo: 1</param>
+        /// <param name="convertCurrencyDollarsRequestDto">Objeto con el Identificador de la cuenta.</param>
         /// <returns>Un ActionResult que indica si la conversión a dólares se realizó con éxito. </returns>
         [HttpPost("convertirMonedaDolares")]
-        public async Task<IActionResult> ConvertCurrencyDollars(int accountId)
+        public async Task<IActionResult> ConvertCurrencyDollars(ConvertCurrencyDollarsRequestDto convertCurrencyDollarsRequestDto)
         {
+            var validation = await _validationsManager.ValidateAsync(convertCurrencyDollarsRequestDto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(convertCurrencyDollarsRequestDto.AccountId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta de banco proporcionada");
+            }
+
             try
             {
-                decimal result = await _currenciesServices.ConvertCurrencyDollars(accountId);
+                decimal result = await _currenciesServices.ConvertCurrencyDollars(convertCurrencyDollarsRequestDto);
+                return Ok("La conversión a dólares se realizó con éxito. Saldo: " + result);
 
-                if (result != 0)
-                {
-                    return Ok("La conversión a dólares se realizó con éxito.");
-                }
-                else
-                {
-                    return BadRequest("No se pudo realizar la conversión a dólares.");
-                }
             }
             catch (Exception ex)
             {

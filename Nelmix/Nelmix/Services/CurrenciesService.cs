@@ -3,6 +3,7 @@ using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Models;
 using System.Data;
+using static Nelmix.DTOs.CurrenciesDTO;
 
 namespace Nelmix.Services
 {
@@ -19,41 +20,39 @@ namespace Nelmix.Services
         /// <summary>
         /// Convierte el saldo de una cuenta a dólares.
         /// </summary>
-        /// <param name="accountId">Identificador de la cuenta.</param>
+        /// <param name="convertCurrencyDollarsRequestDto">Objeto con el Identificador de la cuenta.</param>
         /// <returns>El saldo convertido a dólares.</returns>
-        public async Task<decimal> ConvertCurrencyDollars(int accountId)
+        public async Task<decimal> ConvertCurrencyDollars(ConvertCurrencyDollarsRequestDto convertCurrencyDollarsRequestDto)
         {
             try
             {
-                var cuentaBancaria = await _context.CuentasBancarias.FindAsync(accountId);
+                var cuentaBancaria = await _context.CuentasBancarias.FindAsync(convertCurrencyDollarsRequestDto.AccountId);
 
-                if (cuentaBancaria != null)
+                var monedaId = cuentaBancaria.MonedaId;
+
+                var tasaConversion = await _context.TasasDeCambios
+                    .Where(tc => tc.MonedaId == monedaId)
+                    .Select(tc => tc.Tasa)
+                    .FirstOrDefaultAsync();
+
+                if (tasaConversion > 0)
                 {
-                    var monedaId = cuentaBancaria.MonedaId;
+                    var nuevoSaldo = cuentaBancaria.Saldo * tasaConversion;
 
-                    var tasaConversion = await _context.TasasDeCambios
-                        .Where(tc => tc.MonedaId == monedaId)
-                        .Select(tc => tc.Tasa)
+                    cuentaBancaria.MonedaId = await _context.Monedas
+                        .Where(m => m.Nombre == "Dólar estadounidense")
+                        .Select(m => m.MonedaId)
                         .FirstOrDefaultAsync();
 
-                    if (tasaConversion > 0)
-                    {
-                        var nuevoSaldo = cuentaBancaria.Saldo * tasaConversion;
+                    cuentaBancaria.Saldo = nuevoSaldo;
 
-                        cuentaBancaria.MonedaId = await _context.Monedas
-                            .Where(m => m.Nombre == "Dólar estadounidense")
-                            .Select(m => m.MonedaId)
-                            .FirstOrDefaultAsync();
+                    await _context.SaveChangesAsync();
 
-                        cuentaBancaria.Saldo = nuevoSaldo;
-
-                        await _context.SaveChangesAsync();
-
-                        return (decimal)nuevoSaldo;
-                    }
+                    return (decimal)nuevoSaldo;
                 }
+                
 
-                throw new Exception("Cuenta bancaria no encontrada o tasa de cambio no válida.");
+                throw new Exception("tasa de cambio no válida.");
             }
             catch (Exception ex)
             {
