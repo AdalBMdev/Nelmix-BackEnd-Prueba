@@ -8,7 +8,7 @@ namespace Nelmix.Interfaces
         Task RegisterUser(RegisterUserRequestDto usuario);
         Task<bool> Login(LoginUserRequestDto usuario);
         Task ChangePassword(ChangePasswordRequestDto changePasswordUsuario);
-        Task<(bool, string)> AssignAdultResponsible(string mailUserMinor, string mailUserAdult);
+        Task AssignAdultResponsible(AssignAdultResponsableRequestDto usersEmails);
         Task ChangeUserStatusInactiveAsync(int userId);
     }
 }

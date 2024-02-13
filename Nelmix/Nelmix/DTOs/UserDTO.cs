@@ -24,5 +24,11 @@ namespace Nelmix.DTOs
             public string Password { get; set; }
             public string NewPassword { get; set; }
         }
+
+        public class AssignAdultResponsableRequestDto
+        {
+            public string MailUserMinor { get; set; }
+            public string MailUserAdult { get; set; }
+        }
     }
 }

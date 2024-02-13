@@ -30,6 +30,17 @@ namespace Nelmix.Validations
             RuleFor(x => x.Email).NotEmpty().EmailAddress();
             RuleFor(x => x.Password).NotEmpty().MinimumLength(8);
             RuleFor(x => x.NewPassword).NotEmpty().MinimumLength(8).NotEqual(x => x.Password);
+        }       
+    }
+
+    public class AssignAdultValidator : AbstractValidator<AssignAdultResponsableRequestDto>
+    {
+        public AssignAdultValidator()
+        {
+            RuleFor(x => x.MailUserAdult).NotEmpty().EmailAddress();
+            RuleFor(x => x.MailUserMinor).NotEmpty().EmailAddress();
+
         }
     }
 }
+

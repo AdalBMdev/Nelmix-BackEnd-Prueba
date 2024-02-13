@@ -21,7 +21,8 @@ namespace Nelmix.Validations
             IValidator<DeleteBankAccountRequestDto> validatorBankAccountDelete,
             IValidator<RegisterUserRequestDto> validatorRegisterUser,
             IValidator<LoginUserRequestDto> validatorLoginUser,
-            IValidator<ChangePasswordRequestDto> validatorChangePasswordUser
+            IValidator<ChangePasswordRequestDto> validatorChangePasswordUser,
+            IValidator<AssignAdultResponsableRequestDto> validatorAssignAdultValidator
 
 
 
@@ -37,7 +38,8 @@ namespace Nelmix.Validations
                 { typeof(DeleteBankAccountRequestDto), validatorBankAccountDelete },
                 { typeof(RegisterUserRequestDto), validatorRegisterUser },
                 { typeof(LoginUserRequestDto), validatorLoginUser },
-                { typeof(ChangePasswordRequestDto), validatorChangePasswordUser }
+                { typeof(ChangePasswordRequestDto), validatorChangePasswordUser },
+                { typeof(AssignAdultResponsableRequestDto), validatorAssignAdultValidator }
 
             };
         }
@@ -70,6 +72,20 @@ namespace Nelmix.Validations
             var emailExists = await _context.Usuarios.AnyAsync(account => account.Email == email);
 
             return emailExists;
+        }
+
+        public async Task<bool> ValidateAdultExistAsync(string email)
+        {
+            var adultExists = await _context.Usuarios.AnyAsync(account => account.Email == email && account.Edad > 21);
+
+            return adultExists;
+        }
+
+        public async Task<bool> ValidateUserIsMinorExistAsync(string email)
+        {
+            var userMinorExists = await _context.Usuarios.AnyAsync(account => account.Email == email && account.Edad < 21);
+
+            return userMinorExists;
         }
 
     }

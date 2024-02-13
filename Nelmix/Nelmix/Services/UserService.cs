@@ -71,7 +71,6 @@ namespace Nelmix.Services
             {
                 throw new Exception("Usuario no encontrado.");
             }
-
             user.Contraseña = changePasswordUsuario.NewPassword;
             await _context.SaveChangesAsync();
         }
@@ -80,35 +79,18 @@ namespace Nelmix.Services
         /// <summary>
         /// Asigna un adulto responsable a un usuario menor.
         /// </summary>
-        /// <param name="mailUserMinor">Correo electrónico del usuario menor.</param>
-        /// <param name="mailUserAdult">Correo electrónico del adulto responsable.</param>
+        /// <param name="usersEmails">Un objeto con 2 emails, el email del usuario mayor y menor</param>
         /// <returns>Una tupla que contiene un valor booleano (True si la asignación fue exitosa) y un mensaje de texto.</returns>
-        public async Task<(bool, string)> AssignAdultResponsible(string mailUserMinor, string mailUserAdult)
+        public async Task AssignAdultResponsible(AssignAdultResponsableRequestDto usersEmails)
         {
-            bool register = false;
-            string message = "Se ha asignado el adulto correctamente";
 
-            var userMinor = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == mailUserMinor);
+            var userMinor = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == usersEmails.MailUserMinor);       
 
-            if (userMinor == null || userMinor.Edad >= 21)
-            {
-                message = "El usuario menor no existe o es mayor de edad.";
-                return (register, message);
-            }
-
-            var adult = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == mailUserAdult);
-
-            if (adult == null || adult.Edad < 21)
-            {
-                message = "El adulto responsable no existe o es menor de edad.";
-                return (register, message);
-            }
+            var adult = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == usersEmails.MailUserAdult);
 
             userMinor.AdultoAsignadoId = adult.UserId;
 
             await _context.SaveChangesAsync();
-
-            return (register = true, message);
         }
 
 

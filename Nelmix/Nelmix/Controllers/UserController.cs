@@ -135,24 +135,37 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Asigna un adulto responsable a un usuario menor.
         /// </summary>
-        /// <param name="mailUserMinor">Correo electrónico del usuario menor.  Ejemplo: userMinor@gmail.com</param>
-        /// <param name="mailUserAdult">Correo electrónico del adulto responsable.  Ejemplo: userAdult@gmail.com</param>
+        /// <param name="usersEmails">Un objeto con 2 emails, el email del usuario mayor y menor</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPut("AsignarAdulto")]
-        public async Task<IActionResult> AsignarAdultoResponsable(string mailUserMinor, string mailUserAdult)
+        public async Task<IActionResult> AsignarAdultoResponsable(AssignAdultResponsableRequestDto usersEmails)
         {
+
+            var validation = await _validationsManager.ValidateAsync(usersEmails);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var adultExist = await _validationsManager.ValidateAdultExistAsync(usersEmails.MailUserAdult);
+
+            if (!adultExist)
+            {
+                return BadRequest("El usuario ingresado no tiene una cuenta en nuestro sistema o es menor de edad");
+            }
+
+            var minorExist = await _validationsManager.ValidateUserIsMinorExistAsync(usersEmails.MailUserMinor);
+
+            if (!minorExist)
+            {
+                return BadRequest("El usuario ingresado no tiene una cuenta en nuestro sistema o no es menor de edad por lo que no necesita adulto asignado");
+            }
+
             try
             {
-                (bool registrado, string mensaje) = await _userService.AssignAdultResponsible(mailUserMinor, mailUserAdult);
-
-                if (registrado)
-                {
-                    return Ok(mensaje);
-                }
-                else
-                {
-                    return BadRequest(mensaje);
-                }
+                await _userService.AssignAdultResponsible(usersEmails);
+                return Ok("Se asigno correctamente el adulto");
             }
             catch (Exception ex)
             {
