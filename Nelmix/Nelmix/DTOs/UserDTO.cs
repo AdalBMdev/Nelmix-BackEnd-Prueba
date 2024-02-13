@@ -17,5 +17,12 @@ namespace Nelmix.DTOs
             public string Email { get; set; }
             public string Password { get; set; }
         }
+
+        public class ChangePasswordRequestDto
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+            public string NewPassword { get; set; }
+        }
     }
 }

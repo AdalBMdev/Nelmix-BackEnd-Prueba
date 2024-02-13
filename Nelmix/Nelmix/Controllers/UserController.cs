@@ -99,25 +99,31 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Cambia la contraseña de un usuario.
         /// </summary>
-        /// <param name="email">Correo electrónico del usuario. Ejemplo: john@gmail.com</param>
-        /// <param name="password">Contraseña del usuario. Ejemplo: 123</param>
-        /// <param name="newPassword">Nueva contraseña para el usuario. Ejemplo: 1234</param>
+        /// <param name="changePasswordUsuario">Un objeto con informacion para cambiar contraseña</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("ChangePassword")]
-        public async Task<IActionResult> ChangePassword(string email, string password, string newPassword)
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequestDto changePasswordUsuario)
         {
+
+            var validation = await _validationsManager.ValidateAsync(changePasswordUsuario);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var emailExist = await _validationsManager.ValidateEmailExistAsync(changePasswordUsuario.Email);
+
+            if (!emailExist)
+            {
+                return BadRequest("El email ingresado no tiene una cuenta en nuestro sistema");
+            }
+
             try
             {
-                (bool success, string message) = await _userService.ChangePassword(email, password, newPassword);
+                await _userService.ChangePassword(changePasswordUsuario);
+                return Ok("Contraseña cambiada exitosamente.");
 
-                if (success)
-                {
-                    return Ok("Contraseña cambiada exitosamente.");
-                }
-                else
-                {
-                    return BadRequest(message);
-                }
             }
             catch (Exception ex)
             {

@@ -58,37 +58,22 @@ namespace Nelmix.Services
         /// <summary>
         /// Cambia la contraseña de un usuario.
         /// </summary>
-        /// <param name="email">Correo electrónico del usuario.</param>
-        /// <param name="password">Contraseña actual del usuario.</param>
-        /// <param name="newPassword">Nueva contraseña que se asignará al usuario.</param>
+        /// <param name="changePasswordUsuario">Un objeto con informacion para cambiar contraseña</param>
         /// <returns>True si la contraseña se cambia con éxito, de lo contrario, False.</returns>
-        public async Task<(bool, string)> ChangePassword(string email, string password, string newPassword)
+        public async Task ChangePassword(ChangePasswordRequestDto changePasswordUsuario)
         {
-            bool success = false;
-            string message = "";
+            changePasswordUsuario.Password = ConvertSha256(changePasswordUsuario.Password);
+            changePasswordUsuario.NewPassword = ConvertSha256(changePasswordUsuario.NewPassword);
 
-            password = ConvertSha256(password);
-            newPassword = ConvertSha256(newPassword);
+            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == changePasswordUsuario.Email && u.Contraseña == changePasswordUsuario.Password);
 
-            var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email && u.Contraseña == password);
-
-            if (user != null)
+            if (user == null)
             {
-                if (password == newPassword)
-                {
-                    return (success, message = "La contraseña es igual a la anterior");
-                }
-
-                user.Contraseña = newPassword;
-
-                await _context.SaveChangesAsync();
-
-                return (success = true, message);
+                throw new Exception("Usuario no encontrado.");
             }
-            else
-            {
-                return (success, message = "No se ha podido cambiar la contraseña");
-            }
+
+            user.Contraseña = changePasswordUsuario.NewPassword;
+            await _context.SaveChangesAsync();
         }
 
 

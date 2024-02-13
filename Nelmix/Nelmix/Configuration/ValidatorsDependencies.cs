@@ -15,8 +15,10 @@ namespace Nelmix.Configuration
             services.AddScoped<IValidator<AddBankAccountBalanceRequestDto>, UpdateBankAccountValidator>();
             services.AddScoped<IValidator<DeleteBankAccountRequestDto>, DeleteBankAccountValidator>();
             //User
-            services.AddScoped<IValidator<RegisterUserRequestDto>, RegisterUsertValidator>();
-            services.AddScoped<IValidator<LoginUserRequestDto>, LoginUsertValidator>();
+            services.AddScoped<IValidator<RegisterUserRequestDto>, RegisterUserValidator>();
+            services.AddScoped<IValidator<LoginUserRequestDto>, LoginUserValidator>();
+            services.AddScoped<IValidator<ChangePasswordRequestDto>, ChangePasswordValidator>();
+
 
 
 

@@ -20,7 +20,9 @@ namespace Nelmix.Validations
             IValidator<AddBankAccountBalanceRequestDto> validatorBankAccountSaldoUpdate,
             IValidator<DeleteBankAccountRequestDto> validatorBankAccountDelete,
             IValidator<RegisterUserRequestDto> validatorRegisterUser,
-            IValidator<LoginUserRequestDto> validatorLoginUser
+            IValidator<LoginUserRequestDto> validatorLoginUser,
+            IValidator<ChangePasswordRequestDto> validatorChangePasswordUser
+
 
 
 
@@ -34,7 +36,8 @@ namespace Nelmix.Validations
                 { typeof(AddBankAccountBalanceRequestDto), validatorBankAccountSaldoUpdate },
                 { typeof(DeleteBankAccountRequestDto), validatorBankAccountDelete },
                 { typeof(RegisterUserRequestDto), validatorRegisterUser },
-                { typeof(LoginUserRequestDto), validatorLoginUser }
+                { typeof(LoginUserRequestDto), validatorLoginUser },
+                { typeof(ChangePasswordRequestDto), validatorChangePasswordUser }
 
             };
         }
