@@ -16,8 +16,20 @@ namespace Nelmix.Validations
         public BuyChipsInDollarsDollarsValidator()
         {
             RuleFor(x => x.UserId).NotEmpty().GreaterThan(0);
-            RuleFor(x => x.TypeFileId).NotEmpty().GreaterThan(0).InclusiveBetween(1, 4);
+            RuleFor(x => x.TypeFileId).NotEmpty().InclusiveBetween(1, 4);
             RuleFor(x => x.Quantity).NotEmpty().GreaterThan(0);
+        }
+    }
+
+    public class ExchangeChipsToCurrencyValidator : AbstractValidator<ExchangeChipsToCurrencyRequestDto>
+    {
+        public ExchangeChipsToCurrencyValidator()
+        {
+            RuleFor(x => x.UserId).NotEmpty().GreaterThan(0);
+            RuleFor(x => x.TypeFileId).NotEmpty().InclusiveBetween(1, 4);
+            RuleFor(x => x.Quantity).NotEmpty().GreaterThan(0);
+            RuleFor(x => x.CurrencyDestinationId).NotEmpty().NotEqual(1); // 1 is the id of the currency in dollars
+
         }
     }
 

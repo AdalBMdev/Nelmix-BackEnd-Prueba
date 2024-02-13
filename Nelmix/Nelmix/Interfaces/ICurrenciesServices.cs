@@ -8,7 +8,7 @@ namespace Nelmix.Interfaces
 
         Task BuyChipsInDollars(BuyChipsInDollarsRequestDto buyChipsInDollarsRequestDto);
 
-        Task<string> ExchangeChipsToCurrency(int userId, int typeFileId, int currencyDestinationId, int quantityFichas);
+        Task<string> ExchangeChipsToCurrency(ExchangeChipsToCurrencyRequestDto exchangeChips);
 
     }
 }

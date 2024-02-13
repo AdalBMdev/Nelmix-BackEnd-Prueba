@@ -13,5 +13,11 @@
             public int TypeFileId { get; set; }
             public int Quantity { get; set; }
         }
+
+        public class ExchangeChipsToCurrencyRequestDto : BuyChipsInDollarsRequestDto
+        {
+            public int CurrencyDestinationId { get; set; }
+            
+        }
     }
 }

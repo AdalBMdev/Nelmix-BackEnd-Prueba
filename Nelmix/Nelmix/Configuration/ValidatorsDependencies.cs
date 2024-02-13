@@ -24,6 +24,8 @@ namespace Nelmix.Configuration
             //Currencies
             services.AddScoped<IValidator<ConvertCurrencyDollarsRequestDto>, ConvertCurrencyDollarsValidator>();
             services.AddScoped<IValidator<BuyChipsInDollarsRequestDto>, BuyChipsInDollarsDollarsValidator>();
+            services.AddScoped<IValidator<ExchangeChipsToCurrencyRequestDto>, ExchangeChipsToCurrencyValidator>();
+
 
 
 

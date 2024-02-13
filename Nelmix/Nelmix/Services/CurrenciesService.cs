@@ -113,70 +113,52 @@ namespace Nelmix.Services
         /// <summary>
         /// Intercambia fichas por una moneda específica para un usuario.
         /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="typeFileId">Identificador del tipo de ficha.</param>
-        /// <param name="currencyDestinationId">Moneda de destino para la conversión.</param>
-        /// <param name="quantityFichas">Cantidad de fichas a convertir.</param>
+        /// <param name="exchangeChips.userId">Identificador del usuario.</param>
+        /// <param name="exchangeChips.typeFileId">Identificador del tipo de ficha.</param>
+        /// <param name="exchangeChips.currencyDestinationId">Moneda de destino para la conversión.</param>
+        /// <param name="exchangeChips.quantityFichas">Cantidad de fichas a convertir.</param>
         /// <returns>Un mensaje indicando si la conversión de fichas fue exitosa o un mensaje de error.</returns>
-        public async Task<string> ExchangeChipsToCurrency(int userId, int typeFileId, int currencyDestinationId, int quantityFichas)
+        public async Task<string> ExchangeChipsToCurrency(ExchangeChipsToCurrencyRequestDto exchangeChips)
         {
             try
             {
-                var tipoFicha = await _context.TiposDeFichas.FindAsync(typeFileId);
+                var tipoFicha = await _context.TiposDeFichas.FindAsync(exchangeChips.TypeFileId);
                 var cuentaBancaria = await _context.CuentasBancarias
-                    .FirstOrDefaultAsync(cb => cb.UserId == userId);
+                    .FirstOrDefaultAsync(cb => cb.UserId == exchangeChips.UserId);
 
-                if (tipoFicha != null && cuentaBancaria != null)
-                {
-                    int valorFicha = tipoFicha.Valor;
-                    int monedaActual = cuentaBancaria.MonedaId;  
-                    decimal saldoUsuario = cuentaBancaria.Saldo;
+                int valorFicha = tipoFicha.Valor;
+                int monedaActual = cuentaBancaria.MonedaId;  
+                decimal saldoUsuario = cuentaBancaria.Saldo;
 
-                    decimal tasaConversion = await _context.TasasDeCambios
-                        .Where(tc => tc.MonedaId == currencyDestinationId)
-                        .Select(tc => tc.Tasa)
-                        .FirstOrDefaultAsync();
+                decimal tasaConversion = await _context.TasasDeCambios
+                    .Where(tc => tc.MonedaId == exchangeChips.CurrencyDestinationId)
+                    .Select(tc => tc.Tasa)
+                    .FirstOrDefaultAsync();
 
-                    int cantidadFichasDisponibles = await _context.Fichas
-                        .Where(f => f.UsuarioId == userId && f.TipoFichaId == typeFileId)
-                        .Select(f => f.CantidadDisponible)
-                        .FirstOrDefaultAsync();
 
-                    if (cantidadFichasDisponibles >= quantityFichas && currencyDestinationId != 1)
+                    decimal valorTotalDestino = valorFicha * exchangeChips.Quantity;
+
+                    if (monedaActual != exchangeChips.CurrencyDestinationId)
                     {
-                        decimal valorTotalDestino = valorFicha * quantityFichas;
-
-                        if (monedaActual != currencyDestinationId)
-                        {
-                            valorTotalDestino = (valorFicha * quantityFichas + saldoUsuario) / tasaConversion;
-                        }
-
-                        else valorTotalDestino = (valorFicha * quantityFichas + saldoUsuario);
-
-                        cuentaBancaria.Saldo = valorTotalDestino;
-                        cuentaBancaria.MonedaId = currencyDestinationId; 
-
-                        var fichasUsuario = await _context.Fichas
-                            .FirstOrDefaultAsync(f => f.UsuarioId == userId && f.TipoFichaId == typeFileId);
-
-                        if (fichasUsuario != null)
-                        {
-                            fichasUsuario.CantidadDisponible -= quantityFichas;
-                        }
-
-                        await _context.SaveChangesAsync();
-
-                        return $"Cambio de fichas exitoso. Nuevo saldo en {currencyDestinationId}: {valorTotalDestino}";
+                        valorTotalDestino = (valorFicha * exchangeChips.Quantity + saldoUsuario) / tasaConversion;
                     }
-                    else
+
+                    else valorTotalDestino = (valorFicha * exchangeChips.Quantity + saldoUsuario);
+
+                    cuentaBancaria.Saldo = valorTotalDestino;
+                    cuentaBancaria.MonedaId = exchangeChips.CurrencyDestinationId; 
+
+                    var fichasUsuario = await _context.Fichas
+                        .FirstOrDefaultAsync(f => f.UsuarioId == exchangeChips.UserId && f.TipoFichaId == exchangeChips.TypeFileId);
+
+                    if (fichasUsuario != null)
                     {
-                        return "No tienes suficientes fichas para realizar el cambio o no puedes cambiar a dólares.";
+                        fichasUsuario.CantidadDisponible -= exchangeChips.Quantity;
                     }
-                }
-                else
-                {
-                    return "Error al cambiar las fichas de moneda.";
-                }
+
+                    await _context.SaveChangesAsync();
+
+                    return $"Cambio de fichas exitoso. Nuevo saldo en {exchangeChips.CurrencyDestinationId}: {valorTotalDestino}";       
             }
             catch (Exception ex)
             {

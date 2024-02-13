@@ -16,7 +16,7 @@ namespace Nelmix.Validations
         private readonly Dictionary<Type, IValidator> _dictionary;
 
         public ValidationsManager(
-            CasinoContext context, 
+            CasinoContext context,
             IValidator<CreateBankAccountRequestDto> validatorBankAccountCreate,
             IValidator<AddBankAccountBalanceRequestDto> validatorBankAccountSaldoUpdate,
             IValidator<DeleteBankAccountRequestDto> validatorBankAccountDelete,
@@ -26,7 +26,8 @@ namespace Nelmix.Validations
             IValidator<AssignAdultResponsableRequestDto> validatorAssignAdultValidator,
             IValidator<DesactivateUserRequestDto> validatorDesactivateUser,
             IValidator<ConvertCurrencyDollarsRequestDto> validatorConvertCurrencyDollars,
-            IValidator<BuyChipsInDollarsRequestDto> validatorBuyChipsInDollars
+            IValidator<BuyChipsInDollarsRequestDto> validatorBuyChipsInDollars,
+            IValidator<ExchangeChipsToCurrencyRequestDto> validatorExchangeChipsToCurrency
 
 
 
@@ -49,8 +50,8 @@ namespace Nelmix.Validations
                 { typeof(AssignAdultResponsableRequestDto), validatorAssignAdultValidator },
                 { typeof(DesactivateUserRequestDto), validatorDesactivateUser },
                 { typeof(ConvertCurrencyDollarsRequestDto), validatorConvertCurrencyDollars },
-                { typeof(BuyChipsInDollarsRequestDto), validatorBuyChipsInDollars }
-
+                { typeof(BuyChipsInDollarsRequestDto), validatorBuyChipsInDollars },
+                { typeof(ExchangeChipsToCurrencyRequestDto), validatorExchangeChipsToCurrency }
             };
         }
 
@@ -127,6 +128,21 @@ namespace Nelmix.Validations
             }
 
             else return false;
+        }
+
+        public async Task<bool> ValidateChipsSuficientAsync(int userId, int typeFileId, int quantity)
+        {
+            int cantidadFichasDisponibles = await _context.Fichas
+            .Where(f => f.UsuarioId == userId && f.TipoFichaId == typeFileId)
+            .Select(f => f.CantidadDisponible)
+            .FirstOrDefaultAsync();
+
+            if (cantidadFichasDisponibles >= quantity)
+            {
+                return true;
+            }
+
+            return false;
         }
 
     }

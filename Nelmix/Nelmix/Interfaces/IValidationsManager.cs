@@ -14,6 +14,8 @@ namespace Nelmix.Interfaces
         Task<bool> ValidateUserExistAsync(int id);
         Task<bool> ValidateBankAccountCurrencyIsDolarAndSufficientBalance(BuyChipsInDollarsRequestDto buyChipsInDollarsRequestDto);
 
+        Task<bool> ValidateChipsSuficientAsync(int userId, int typeFileId, int quantity);
+
 
     }
 }

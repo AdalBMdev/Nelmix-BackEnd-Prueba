@@ -102,17 +102,35 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Realiza el intercambio de fichas por una moneda específica menos dolares.
         /// </summary>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <param name="typeFileId">Identificador del tipo de ficha. Ejemplo: 1</param>
-        /// <param name="currencyDestinationId">Id de la moneda de destino para el intercambio. Ejemplo: 2</param>
-        /// <param name="quantityFichas">Cantidad de fichas a intercambiar. Ejemplo: 10</param>
+        /// <param name="exchangeChips">Objeto con UserId, TypeFieldId, Quantity y CurrencyDestinationId.</param>
         /// <returns>Un ActionResult que indica si el intercambio de fichas a moneda se realizó con éxito.</returns>
         [HttpPost("CambioFichasAMoneda")]
-        public async Task<IActionResult> ExchangeChipsToCurrency(int userId, int typeFileId, int currencyDestinationId, int quantityFichas)
+        public async Task<IActionResult> ExchangeChipsToCurrency(ExchangeChipsToCurrencyRequestDto exchangeChips)
         {
+            var validation = await _validationsManager.ValidateAsync(exchangeChips);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateUserBankAccountExistAsync(exchangeChips.UserId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta de banco asignada al usuario proporcionada");
+            }
+
+            var chipsSuficient = await _validationsManager.ValidateChipsSuficientAsync(exchangeChips.UserId, exchangeChips.TypeFileId, exchangeChips.Quantity);
+
+            if (!chipsSuficient)
+            {
+                return BadRequest("El usuario no tiene suficientes fichas para realizar el intercambio");
+            }
+
             try
             {
-                var resultado = await _currenciesServices.ExchangeChipsToCurrency(userId, typeFileId, currencyDestinationId, quantityFichas);
+                var resultado = await _currenciesServices.ExchangeChipsToCurrency(exchangeChips);
                 return Ok(resultado);
             }
 
