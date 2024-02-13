@@ -23,6 +23,8 @@ namespace Nelmix.Configuration
             services.AddScoped<IValidator<DesactivateUserRequestDto>, DesactivateUserValidator>();
             //Currencies
             services.AddScoped<IValidator<ConvertCurrencyDollarsRequestDto>, ConvertCurrencyDollarsValidator>();
+            services.AddScoped<IValidator<BuyChipsInDollarsRequestDto>, BuyChipsInDollarsDollarsValidator>();
+
 
 
 

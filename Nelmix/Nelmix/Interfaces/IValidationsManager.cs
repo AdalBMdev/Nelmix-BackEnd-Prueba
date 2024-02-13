@@ -1,4 +1,5 @@
 ﻿using FluentValidation.Results;
+using static Nelmix.DTOs.CurrenciesDTO;
 
 namespace Nelmix.Interfaces
 {
@@ -11,6 +12,7 @@ namespace Nelmix.Interfaces
         Task<bool> ValidateAdultExistAsync(string email);
         Task<bool> ValidateUserIsMinorExistAsync(string email);
         Task<bool> ValidateUserExistAsync(int id);
+        Task<bool> ValidateBankAccountCurrencyIsDolarAndSufficientBalance(BuyChipsInDollarsRequestDto buyChipsInDollarsRequestDto);
 
 
     }

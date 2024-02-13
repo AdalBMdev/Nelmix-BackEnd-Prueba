@@ -6,7 +6,7 @@ namespace Nelmix.Interfaces
     {
         Task<decimal> ConvertCurrencyDollars(ConvertCurrencyDollarsRequestDto convertCurrencyDollarsRequestDto);
 
-        Task<string> BuyChipsInDollars(int userId, int typeFileId, int quantity);
+        Task BuyChipsInDollars(BuyChipsInDollarsRequestDto buyChipsInDollarsRequestDto);
 
         Task<string> ExchangeChipsToCurrency(int userId, int typeFileId, int currencyDestinationId, int quantityFichas);
 

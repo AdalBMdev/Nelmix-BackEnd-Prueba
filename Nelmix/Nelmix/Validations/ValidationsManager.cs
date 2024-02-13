@@ -25,7 +25,10 @@ namespace Nelmix.Validations
             IValidator<ChangePasswordRequestDto> validatorChangePasswordUser,
             IValidator<AssignAdultResponsableRequestDto> validatorAssignAdultValidator,
             IValidator<DesactivateUserRequestDto> validatorDesactivateUser,
-            IValidator<ConvertCurrencyDollarsRequestDto> validatorConvertCurrencyDollars
+            IValidator<ConvertCurrencyDollarsRequestDto> validatorConvertCurrencyDollars,
+            IValidator<BuyChipsInDollarsRequestDto> validatorBuyChipsInDollars
+
+
 
 
 
@@ -45,7 +48,8 @@ namespace Nelmix.Validations
                 { typeof(ChangePasswordRequestDto), validatorChangePasswordUser },
                 { typeof(AssignAdultResponsableRequestDto), validatorAssignAdultValidator },
                 { typeof(DesactivateUserRequestDto), validatorDesactivateUser },
-                { typeof(ConvertCurrencyDollarsRequestDto), validatorConvertCurrencyDollars }
+                { typeof(ConvertCurrencyDollarsRequestDto), validatorConvertCurrencyDollars },
+                { typeof(BuyChipsInDollarsRequestDto), validatorBuyChipsInDollars }
 
             };
         }
@@ -77,12 +81,6 @@ namespace Nelmix.Validations
             var accountExists = await _context.CuentasBancarias.AnyAsync(account => account.CuentaId == accountId);
 
             return accountExists;
-        public async Task<bool> ValidateBankAccountExistAsync(int accountId)
-        {
-            var accountExists = await _context.CuentasBancarias.AnyAsync(account => account.CuentaId == accountId);
-
-            return accountExists;
-        }
         }
 
         public async Task<bool> ValidateEmailExistAsync(string email)
@@ -111,6 +109,24 @@ namespace Nelmix.Validations
             var userExists = await _context.Usuarios.AnyAsync(account => account.UserId == id);
 
             return userExists;
+        }
+
+        public async Task<bool> ValidateBankAccountCurrencyIsDolarAndSufficientBalance(BuyChipsInDollarsRequestDto buyChipsInDollarsRequestDto)
+        {
+            var chipType = await _context.TiposDeFichas.FindAsync(buyChipsInDollarsRequestDto.TypeFileId);
+
+            decimal chipValueInDollars = (decimal)chipType.Valor;
+            decimal totalCostInDollars = chipValueInDollars * buyChipsInDollarsRequestDto.Quantity;
+
+            var userDollarsAccount = await _context.CuentasBancarias
+                .FirstOrDefaultAsync(account => account.UserId == buyChipsInDollarsRequestDto.UserId && account.MonedaId == 1);
+
+            if (userDollarsAccount != null && userDollarsAccount.Saldo >= totalCostInDollars)
+            {
+                return true;
+            }
+
+            else return false;
         }
 
     }

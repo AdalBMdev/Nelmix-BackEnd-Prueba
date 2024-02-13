@@ -64,62 +64,48 @@ namespace Nelmix.Services
         /// <summary>
         /// Compra fichas en dólares para un usuario.
         /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="typeFileId">Identificador del tipo de ficha.</param>
-        /// <param name="quantity">Cantidad de fichas a comprar.</param>
+        /// <param name="buyChipsInDollarsRequestDto">Objeto con UserId, TypeFieldId y Quantity.</param>
         /// <returns>Un mensaje indicando si la compra de fichas fue exitosa o un mensaje de error.</returns>
-        public async Task<string> BuyChipsInDollars(int userId, int typeFileId, int quantity)
+        public async Task BuyChipsInDollars(BuyChipsInDollarsRequestDto buyChipsInDollarsRequestDto)
         {
             try
             {
-                var user = await _context.Usuarios.FindAsync(userId);
-                var chipType = await _context.TiposDeFichas.FindAsync(typeFileId);
+                var user = await _context.Usuarios.FindAsync(buyChipsInDollarsRequestDto.UserId);
+                var chipType = await _context.TiposDeFichas.FindAsync(buyChipsInDollarsRequestDto.TypeFileId);
 
-                if (user != null && chipType != null)
+                
+                decimal chipValueInDollars = (decimal)chipType.Valor;
+                decimal totalCostInDollars = chipValueInDollars * buyChipsInDollarsRequestDto.Quantity;
+
+                var userDollarsAccount = await _context.CuentasBancarias
+                    .FirstOrDefaultAsync(account => account.UserId == buyChipsInDollarsRequestDto.UserId && account.MonedaId == 1);
+
+
+                userDollarsAccount.Saldo -= totalCostInDollars;
+
+                var chipRecord = await _context.Fichas
+                    .FirstOrDefaultAsync(record => record.UsuarioId == buyChipsInDollarsRequestDto.UserId && record.TipoFichaId == buyChipsInDollarsRequestDto.TypeFileId);
+
+                if (chipRecord != null)
                 {
-                    decimal chipValueInDollars = (decimal)chipType.Valor;
-                    decimal totalCostInDollars = chipValueInDollars * quantity;
-
-                    var userDollarsAccount = await _context.CuentasBancarias
-                        .FirstOrDefaultAsync(account => account.UserId == userId && account.MonedaId == 1);
-
-                    if (userDollarsAccount != null && userDollarsAccount.Saldo >= totalCostInDollars)
-                    {
-                        userDollarsAccount.Saldo -= totalCostInDollars;
-
-                        var chipRecord = await _context.Fichas
-                            .FirstOrDefaultAsync(record => record.UsuarioId == userId && record.TipoFichaId == typeFileId);
-
-                        if (chipRecord != null)
-                        {
-                            chipRecord.CantidadDisponible += quantity;
-                        }
-                        else
-                        {
-                            _context.Fichas.Add(new Ficha
-                            {
-                                TipoFichaId = typeFileId,
-                                CantidadDisponible = quantity,
-                                UsuarioId = userId
-                            });
-                        }
-
-                        await _context.SaveChangesAsync();
-                        return "La compra se ha realizado exitosamente";
-                    }
-                    else
-                    {
-                        return "Saldo insuficiente en dólares para comprar las fichas ";
-                    }
+                    chipRecord.CantidadDisponible += buyChipsInDollarsRequestDto.Quantity;
                 }
                 else
                 {
-                    return "Error al comprar fichas en dólares. Usuario o tipo de ficha no encontrados.";
+                    _context.Fichas.Add(new Ficha
+                    {
+                        TipoFichaId = buyChipsInDollarsRequestDto.TypeFileId,
+                        CantidadDisponible = buyChipsInDollarsRequestDto.Quantity,
+                        UsuarioId = buyChipsInDollarsRequestDto.UserId
+                    });
                 }
+
+                await _context.SaveChangesAsync();
+                
             }
             catch (Exception ex)
             {
-                return "Error interno del servidor: " + ex.Message;
+                throw new Exception("Error durante la conversión a dólares." + ex.Message);
             }
         }
 

@@ -6,5 +6,12 @@
         {
             public int AccountId { get; set; }
         }
+
+        public class BuyChipsInDollarsRequestDto
+        {
+            public int UserId { get; set; }
+            public int TypeFileId { get; set; }
+            public int Quantity { get; set; }
+        }
     }
 }

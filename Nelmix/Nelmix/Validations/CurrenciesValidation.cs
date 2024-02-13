@@ -11,6 +11,15 @@ namespace Nelmix.Validations
         }
     }
 
+    public class BuyChipsInDollarsDollarsValidator : AbstractValidator<BuyChipsInDollarsRequestDto>
+    {
+        public BuyChipsInDollarsDollarsValidator()
+        {
+            RuleFor(x => x.UserId).NotEmpty().GreaterThan(0);
+            RuleFor(x => x.TypeFileId).NotEmpty().GreaterThan(0).InclusiveBetween(1, 4);
+            RuleFor(x => x.Quantity).NotEmpty().GreaterThan(0);
+        }
+    }
 
 }
 
