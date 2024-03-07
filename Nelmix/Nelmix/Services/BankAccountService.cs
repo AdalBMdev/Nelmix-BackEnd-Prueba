@@ -4,6 +4,7 @@ using Nelmix.Interfaces;
 using Nelmix.Models;
 using System.Data;
 using System.Data.SqlClient;
+using static Nelmix.DTOs.BankAccountDTO;
 
 namespace Nelmix.Services
 {
@@ -20,68 +21,49 @@ namespace Nelmix.Services
         /// <summary>
         /// Crea una nueva cuenta bancaria para un usuario con un saldo inicial y una moneda específica.
         /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="currencyId">Identificador de la moneda.</param>
+        /// <param name="createBankAccount">DTO que contiene la información para la creación de la cuenta bancaria.</param>
         /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
-        public async Task<bool> CreateBankAccount(int userId, int currencyId)
+        public async Task CreateBankAccount(CreateBankAccountRequestDto createBankAccount)
         {
             var newBankAccount = new CuentasBancaria
             {
-                UserId = userId,
-                MonedaId = currencyId,
+                UserId = createBankAccount.UserId,
+                MonedaId = createBankAccount.CurrencyId,
                 Saldo = 0
             };
 
             _context.CuentasBancarias.Add(newBankAccount);
             await _context.SaveChangesAsync();
-
-            return true;
         }
 
+
         /// <summary>
-        /// Elimina una cuenta bancaria de un usuario.
+        /// Elimina una cuenta bancaria perteneciente a un usuario.
         /// </summary>
-        /// <param name="cuentaId">Identificador de la cuenta bancaria.</param>
-        /// <param name="userId">Identificador del usuario.</param>
+        /// <param name="deleteBankAccountRequestDto">DTO que contiene la información para la eliminacion de la cuenta bancaria.</param>
         /// <returns>True si la cuenta bancaria se elimina con éxito, de lo contrario, False.</returns>
-        public async Task<bool> DeleteBankAccount(int cuentaId, int userId)
+        public async Task DeleteBankAccount(DeleteBankAccountRequestDto deleteBankAccountRequestDto)
         {
             var bankAccountToDelete = await _context.CuentasBancarias
-                .FirstOrDefaultAsync(account => account.CuentaId == cuentaId && account.UserId == userId);
+                .FirstOrDefaultAsync(account => account.CuentaId == deleteBankAccountRequestDto.BankAccountId && account.UserId == deleteBankAccountRequestDto.UserId);
 
-            if (bankAccountToDelete != null)
-            {
                 _context.CuentasBancarias.Remove(bankAccountToDelete);
                 await _context.SaveChangesAsync();
-
-                return true;
-            }
-
-            return false;
         }
 
 
         /// <summary>
-        /// Agrega saldo a una cuenta bancaria de un usuario en una moneda específica.
+        /// Añade saldo a una cuenta bancaria para un usuario.
         /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="currencyId">Identificador de la moneda.</param>
-        /// <param name="balance">Saldo a agregar a la cuenta bancaria.</param>
-        /// <returns>True si se agrega saldo con éxito, de lo contrario, False.</returns>
-        public async Task<bool> AddBankAccountBalance(int userId, int currencyId, decimal balance)
+        /// <param name="addBankAccountBalanceRequestDto">DTO que contiene la información para añadir saldo de la cuenta bancaria.</param>
+        /// <returns>True si la cuenta bancaria se crea con éxito, de lo contrario, False.</returns>
+        public async Task AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto)
         {
             var bankAccountToUpdate = await _context.CuentasBancarias
-                .FirstOrDefaultAsync(account => account.UserId == userId && account.MonedaId == currencyId);
+                .FirstOrDefaultAsync(account => account.UserId == addBankAccountBalanceRequestDto.UserId && account.MonedaId == addBankAccountBalanceRequestDto.CurrencyId);
 
-            if (bankAccountToUpdate != null)
-            {
-                bankAccountToUpdate.Saldo += balance;
+            bankAccountToUpdate.Saldo += addBankAccountBalanceRequestDto.Saldo;
                 await _context.SaveChangesAsync();
-
-                return true;
-            }
-
-            return false;
         }
 
     }

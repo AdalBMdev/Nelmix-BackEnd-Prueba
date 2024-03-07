@@ -1,13 +1,14 @@
 ﻿using Nelmix.Models;
+using static Nelmix.DTOs.UserDTO;
 
 namespace Nelmix.Interfaces
 {
     public interface IUserService
     {
-        Task<bool> RegisterUser(Usuario usuario);
-        Task<bool> Login(string email, string password);
-        Task<(bool, string)> ChangePassword(string email, string password, string newPassword);
-        Task<(bool, string)> AssignAdultResponsible(string mailUserMinor, string mailUserAdult);
-        Task ChangeUserStatusInactiveAsync(int userId);
+        Task RegisterUser(RegisterUserRequestDto usuario);
+        Task<bool> Login(LoginUserRequestDto usuario);
+        Task ChangePassword(ChangePasswordRequestDto changePasswordUsuario);
+        Task AssignAdultResponsible(AssignAdultResponsableRequestDto usersEmails);
+        Task ChangeUserStatusInactiveAsync(DesactivateUserRequestDto usuario);
     }
 }

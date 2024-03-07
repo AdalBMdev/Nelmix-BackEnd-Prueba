@@ -3,39 +3,48 @@ using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Models;
 using Nelmix.Services;
+using static Nelmix.DTOs.UserDTO;
 
 namespace Nelmix.Controllers
 {
     public class UserController : Controller
     {
         private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly IValidationsManager _validationsManager;
+
+        public UserController(IUserService userService, IValidationsManager validationsManager)
         {
             _userService = userService;
+            _validationsManager = validationsManager;
         }
 
         /// <summary>
         /// Registra un nuevo usuario.
         /// </summary>
-        /// <param name="oUsuario">Objeto de tipo Usuario que contiene los datos del usuario a registrar.</param>
+        /// <param name="registerUsuario">Objeto de tipo Usuario que contiene los datos del usuario a registrar.</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Register")]
-        public async Task<IActionResult> RegisterAsync(Usuario oUsuario)
+        public async Task<IActionResult> RegisterUserAsync(RegisterUserRequestDto registerUsuario)
         {
+
+            var validation = await _validationsManager.ValidateAsync(registerUsuario);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var emailExist = await _validationsManager.ValidateEmailExistAsync(registerUsuario.Email);
+
+            if (emailExist)
+            {
+                return BadRequest("Ya existe un usuario creado con este email");
+            }
 
             try
             {
-
-                bool registrationResult = await _userService.RegisterUser(oUsuario);
-
-                if (registrationResult)
-                {
-                    return Ok("Usuario registrado exitosamente.");
-                }
-                else
-                {
-                    return BadRequest("Error al registrar usuario.");
-                }
+                await _userService.RegisterUser(registerUsuario);
+                return Ok("Usuario registrado exitosamente.");
             }
             
             catch (Exception ex)
@@ -47,15 +56,29 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Inicia sesión de un usuario.
         /// </summary>
-        /// <param name="email">Correo electrónico del usuario. Ejemplo: john@gmail.com</param>
-        /// <param name="password">Contraseña del usuario. Ejemplo: 123</param>
+        /// <param name="loginUsuario">Un objeto con informacion para el login</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(LoginUserRequestDto loginUsuario)
         {
+
+            var validation = await _validationsManager.ValidateAsync(loginUsuario);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var emailExist = await _validationsManager.ValidateEmailExistAsync(loginUsuario.Email);
+
+            if (!emailExist)
+            {
+                return BadRequest("El email ingresado no tiene una cuenta en nuestro sistema");
+            }
+
             try
             {
-                bool loginResult = await _userService.Login(email, password);
+                bool loginResult = await _userService.Login(loginUsuario);
 
                 if (loginResult)
                 {
@@ -76,25 +99,31 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Cambia la contraseña de un usuario.
         /// </summary>
-        /// <param name="email">Correo electrónico del usuario. Ejemplo: john@gmail.com</param>
-        /// <param name="password">Contraseña del usuario. Ejemplo: 123</param>
-        /// <param name="newPassword">Nueva contraseña para el usuario. Ejemplo: 1234</param>
+        /// <param name="changePasswordUsuario">Un objeto con informacion para cambiar contraseña</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPost("ChangePassword")]
-        public async Task<IActionResult> ChangePassword(string email, string password, string newPassword)
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequestDto changePasswordUsuario)
         {
+
+            var validation = await _validationsManager.ValidateAsync(changePasswordUsuario);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var emailExist = await _validationsManager.ValidateEmailExistAsync(changePasswordUsuario.Email);
+
+            if (!emailExist)
+            {
+                return BadRequest("El email ingresado no tiene una cuenta en nuestro sistema");
+            }
+
             try
             {
-                (bool success, string message) = await _userService.ChangePassword(email, password, newPassword);
+                await _userService.ChangePassword(changePasswordUsuario);
+                return Ok("Contraseña cambiada exitosamente.");
 
-                if (success)
-                {
-                    return Ok("Contraseña cambiada exitosamente.");
-                }
-                else
-                {
-                    return BadRequest(message);
-                }
             }
             catch (Exception ex)
             {
@@ -106,24 +135,37 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Asigna un adulto responsable a un usuario menor.
         /// </summary>
-        /// <param name="mailUserMinor">Correo electrónico del usuario menor.  Ejemplo: userMinor@gmail.com</param>
-        /// <param name="mailUserAdult">Correo electrónico del adulto responsable.  Ejemplo: userAdult@gmail.com</param>
+        /// <param name="usersEmails">Un objeto con 2 emails, el email del usuario mayor y menor</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPut("AsignarAdulto")]
-        public async Task<IActionResult> AsignarAdultoResponsable(string mailUserMinor, string mailUserAdult)
+        public async Task<IActionResult> AsignarAdultoResponsable(AssignAdultResponsableRequestDto usersEmails)
         {
+
+            var validation = await _validationsManager.ValidateAsync(usersEmails);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var adultExist = await _validationsManager.ValidateAdultExistAsync(usersEmails.MailUserAdult);
+
+            if (!adultExist)
+            {
+                return BadRequest("El usuario ingresado no tiene una cuenta en nuestro sistema o es menor de edad");
+            }
+
+            var minorExist = await _validationsManager.ValidateUserIsMinorExistAsync(usersEmails.MailUserMinor);
+
+            if (!minorExist)
+            {
+                return BadRequest("El usuario ingresado no tiene una cuenta en nuestro sistema o no es menor de edad por lo que no necesita adulto asignado");
+            }
+
             try
             {
-                (bool registrado, string mensaje) = await _userService.AssignAdultResponsible(mailUserMinor, mailUserAdult);
-
-                if (registrado)
-                {
-                    return Ok(mensaje);
-                }
-                else
-                {
-                    return BadRequest(mensaje);
-                }
+                await _userService.AssignAdultResponsible(usersEmails);
+                return Ok("Se asigno correctamente el adulto");
             }
             catch (Exception ex)
             {
@@ -135,14 +177,28 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Desactiva un usuario.
         /// </summary>
-        /// <param name="userId">Identificador del usuario a desactivar. Ejemplo: 1</param>
+        /// <param name="usuario">Identificador del usuario a desactivar. Ejemplo: 1</param>
         /// <returns>Un ActionResult que indica el resultado de la operación.</returns>
         [HttpPut("desactivar-usuario")]
-        public async Task<IActionResult> DesactivateUser(int userId)
+        public async Task<IActionResult> DesactivateUser(DesactivateUserRequestDto usuario)
         {
+            var validation = await _validationsManager.ValidateAsync(usuario);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var user = await _validationsManager.ValidateUserExistAsync(usuario.UserId);
+
+            if (!user)
+            {
+                return BadRequest("El identificador del usuario ingresado no tiene una cuenta en nuestro sistema");
+            }
+
             try
             {
-                await _userService.ChangeUserStatusInactiveAsync(userId);
+                await _userService.ChangeUserStatusInactiveAsync(usuario);
                 return Ok("Usuario desactivado exitosamente.");
             }
 

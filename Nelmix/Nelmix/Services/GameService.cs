@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Nelmix.Context;
 using Nelmix.Interfaces;
-using System.Data;
-using System.Data.SqlClient;
+using static Nelmix.DTOs.GameDTO;
 
 
 namespace Nelmix.Services
@@ -16,131 +15,6 @@ namespace Nelmix.Services
         {
             _context = context;
         }
-        /// <summary>
-        /// Verifica si un usuario es elegible para jugar.
-        /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        public async Task<bool> VerifyEligibilityToPlay(int userId)
-        {
-            try
-            {
-                var usuario = await _context.Usuarios
-                    .Where(u => u.UserId == userId)
-                    .FirstOrDefaultAsync();
-
-                if (usuario != null)
-                {
-                    int edad = usuario.Edad;
-                    int adultoAsignadoId = usuario.AdultoAsignadoId;
-
-                    bool esElegible = edad >= 21 || adultoAsignadoId != 0;
-
-                    return esElegible;
-                }
-                else
-                {
-                    throw new Exception("Usuario no encontrado");
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al verificar elegibilidad para jugar" + ex.Message);
-            }
-        }
-
-
-        /// <summary>
-        /// Verifica si un usuario tiene suficientes fichas disponibles para jugar.
-        /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="redChips">Cantidad de fichas rojas.</param>
-        /// <param name="yellowChips">Cantidad de fichas amarillas.</param>
-        /// <param name="greenChips">Cantidad de fichas verdes.</param>
-        /// <param name="blackChips">Cantidad de fichas negras.</param>
-        /// <returns>True si el usuario tiene suficientes fichas, de lo contrario, False.</returns>
-        public async Task<bool> VerifyAvailabilityFiches(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
-        {
-            try
-            {
-                var fichasDisponibles = await _context.Fichas
-                    .Where(f => f.UsuarioId == userId &&
-                                (f.TipoFichaId == 1 && redChips > 0 ||
-                                 f.TipoFichaId == 2 && yellowChips > 0 ||
-                                 f.TipoFichaId == 3 && greenChips > 0 ||
-                                 f.TipoFichaId == 4 && blackChips > 0))
-                    .GroupBy(f => f.TipoFichaId)
-                    .Select(g => new { TipoFichaId = g.Key, CantidadDisponible = g.Sum(f => f.CantidadDisponible) })
-                    .ToDictionaryAsync(f => f.TipoFichaId, f => f.CantidadDisponible);
-
-                bool fichasSuficientes =
-                    (!fichasDisponibles.ContainsKey(1) || (fichasDisponibles.ContainsKey(1) && redChips <= fichasDisponibles[1])) &&
-                    (!fichasDisponibles.ContainsKey(2) || (fichasDisponibles.ContainsKey(2) && yellowChips <= fichasDisponibles[2])) &&
-                    (!fichasDisponibles.ContainsKey(3) || (fichasDisponibles.ContainsKey(3) && greenChips <= fichasDisponibles[3])) &&
-                    (!fichasDisponibles.ContainsKey(4) || (fichasDisponibles.ContainsKey(4) && blackChips <= fichasDisponibles[4]));
-
-
-                return fichasSuficientes;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al verificar disponibilidad de fichas" + ex.Message);
-            }
-        }
-
-
-        /// <summary>
-        /// Verifica si un usuario ha excedido el límite de pérdida en un juego específico.
-        /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <param name="juegoId">Identificador del juego.</param>
-        /// <returns>True si el usuario ha excedido el límite de pérdida, de lo contrario, False.</returns>
-        public async Task<bool> VerifyLoseLimit(int userId, int juegoId)
-        {
-            try
-            {
-                decimal limitePerdida = 10000.00M;
-
-                var perdidas = await _context.ApuestasUsuarios
-                    .Where(a => a.UsuarioId == userId && a.JuegoId == juegoId)
-                    .SumAsync(a => (decimal?)a.CantidadPerdida) ?? 0;
-
-                bool excedido = perdidas >= limitePerdida;
-
-                return excedido;
-            }
-            catch (Exception ex)
-            {
-                // Manejar y registrar el error aquí
-                throw new Exception("Error al verificar límite de pérdida en el juego" + ex.Message);
-            }
-        }
-
-
-        /// <summary>
-        /// Verifica si un usuario ha excedido el límite de ganancia en un juego específico.
-        /// </summary>
-        /// <param name="userId">Identificador del usuario.</param>
-        /// <returns>True si el usuario ha excedido el límite de ganancia, de lo contrario, False.</returns>
-        public async Task<bool> VerifyGainLimit(int userId)
-        {
-            try
-            {
-                decimal limiteGanancia = 25000.00M;
-
-                var ganancias = await _context.ApuestasUsuarios
-                    .Where(a => a.UsuarioId == userId)
-                    .SumAsync(a => (decimal?)a.CantidadGanada) ?? 0;
-
-                bool limiteExcedido = ganancias >= limiteGanancia;
-
-                return limiteExcedido;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al verificar límite de ganancia" + ex.Message);
-            }
-        }
-
 
         /// <summary>
         /// Gestiona el juego de un usuario, actualizando las fichas y el estado de victoria en la base de datos.
@@ -153,64 +27,11 @@ namespace Nelmix.Services
         /// <param name="victory">Indica si el usuario ha ganado el juego.</param>
         /// <param name="gameId">Identificador del juego.</param>
         /// <returns>True si la gestión del juego se realiza con éxito, de lo contrario, False.</returns>
-        public async Task<bool> ManageUserGame(int userId, int redChips, int yellowChips, int greenChips, int blackChips, bool victory, int gameId)
+        public async Task ManageUserGame(ManageUserGameRequestDto request)
         {
-            try
-            {
-                await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC GestionarJuegoUsuario @usuario_id={0}, @fichas_rojas={1}, @fichas_amarillas={2}, @fichas_verdes={3}, @fichas_negras={4}, @victoria={5}, @juego_id={6}",
-                    userId, redChips, yellowChips, greenChips, blackChips, victory ? 1 : 0, gameId);
-
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al gestionar el juego del usuario" + ex.Message);
-            }
-        }
-
-
-        /// <summary>
-        /// Verifica si un usuario cumple con los requisitos para jugar, incluyendo elegibilidad, disponibilidad de fichas y límites de ganancia y pérdida.
-        /// </summary>
-        /// <param name="usuarioId">Identificador del usuario.</param>
-        /// <param name="redChips">Cantidad de fichas rojas.</param>
-        /// <param name="yellowChips">Cantidad de fichas amarillas.</param>
-        /// <param name="greenChips">Cantidad de fichas verdes.</param>
-        /// <param name="blackChips">Cantidad de fichas negras.</param>
-        /// <param name="juegoId">Identificador del juego.</param>
-        /// <returns>True si el usuario cumple con los requisitos para jugar, de lo contrario, False.</returns>
-        public async Task<bool> VerifyPlay(int usuarioId, int redChips, int yellowChips, int greenChips, int blackChips, int juegoId)
-        {
-            try
-            {
-                if (!await VerifyEligibilityToPlay(usuarioId))
-                {
-                    return false;
-                }
-
-                if (!await VerifyAvailabilityFiches(usuarioId, redChips, yellowChips, greenChips, blackChips))
-                {
-                    return false;
-                }
-
-                if (await VerifyGainLimit(usuarioId))
-                {
-                    return false;
-                }
-
-                if (await VerifyLoseLimit(usuarioId, juegoId))
-                {
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC GestionarJuegoUsuario @usuario_id={0}, @fichas_rojas={1}, @fichas_amarillas={2}, @fichas_verdes={3}, @fichas_negras={4}, @victoria={5}, @juego_id={6}",
+                request.UserId, request.RedChips, request.YellowChips, request.GreenChips, request.BlackChips, request.Victory ? 1 : 0, request.GameId);
         }
 
         /// <summary>

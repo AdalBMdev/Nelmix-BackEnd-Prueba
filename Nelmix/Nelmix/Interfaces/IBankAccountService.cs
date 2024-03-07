@@ -1,10 +1,13 @@
-﻿namespace Nelmix.Interfaces
+﻿using Microsoft.AspNetCore.Mvc;
+using static Nelmix.DTOs.BankAccountDTO;
+
+namespace Nelmix.Interfaces
 {
     public interface IBankAccountService
     {
-        Task<bool> CreateBankAccount(int userId, int currencyId);
-        Task<bool> DeleteBankAccount(int accountId, int userId);
-        Task<bool> AddBankAccountBalance(int userId, int currencyId, decimal balance);
+        Task CreateBankAccount(CreateBankAccountRequestDto createBankAccount);
+        Task DeleteBankAccount(DeleteBankAccountRequestDto deleteBankAccountRequestDto);
+        Task AddBankAccountBalance(AddBankAccountBalanceRequestDto addBankAccountBalanceRequestDto);
 
     }
 }

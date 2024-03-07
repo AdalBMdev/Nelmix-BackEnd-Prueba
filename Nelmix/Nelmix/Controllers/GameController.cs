@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query;
 using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Services;
+using static Nelmix.DTOs.CurrenciesDTO;
+using static Nelmix.DTOs.GameDTO;
 
 namespace Nelmix.Controllers
 {
@@ -9,27 +13,40 @@ namespace Nelmix.Controllers
     {
 
         private readonly IGameService _gameService;
+        private readonly IValidationsManager _validationsManager;
 
-        public GameController(IGameService gameService)
+
+        public GameController(IGameService gameService, IValidationsManager validationsManager)
         {
             _gameService = gameService;
+            _validationsManager = validationsManager;
         }
 
-        /// <summary>
+        //// <summary>
         /// Permite a un usuario jugar a Craps.
         /// </summary>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <param name="redChips">Cantidad de fichas rojas apostadas. Ejemplo: 10</param>
-        /// <param name="yellowChips">Cantidad de fichas amarillas apostadas. Ejemplo: 0</param>
-        /// <param name="greenChips">Cantidad de fichas verdes apostadas. Ejemplo: 0</param>
-        /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
+        /// <param name="request">DTO que contiene los datos necesarios para gestionar el juego del usuario.</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayCraps")]
-        public async Task<IActionResult> PlayCraps(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        public async Task<IActionResult> PlayCraps(ManageUserGameRequestDto request)
         {
-            int gameId = 1;
+            request.GameId = 1;
 
-            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+            var validation = await _validationsManager.ValidateAsync(request);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(request.UserId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta de banco asignada a este usuario");
+            }
+
+            var verificationResult = await _validationsManager.VerifyPlay(request);
 
             if (!verificationResult)
             {
@@ -37,14 +54,14 @@ namespace Nelmix.Controllers
             }
 
             var (victory, resultMessage) = _gameService.PlayCraps();
-            bool finalVictory = victory ?? false; 
+            request.Victory = victory ?? false; 
 
             if (victory == null)
             {
                 return BadRequest("No se ha determinado una victoria o derrota.");
             }
 
-            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, finalVictory, gameId);
+            await _gameService.ManageUserGame(request);
 
             return Ok(resultMessage);
         }
@@ -52,26 +69,37 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Permite a un usuario jugar a Tragaperras.
         /// </summary>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <param name="redChips">Cantidad de fichas rojas apostadas. Ejemplo: 10</param>
-        /// <param name="yellowChips">Cantidad de fichas amarillas apostadas. Ejemplo: 0</param>
-        /// <param name="greenChips">Cantidad de fichas verdes apostadas. Ejemplo: 0</param>
-        /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
+        /// <param name="request">DTO que contiene los datos necesarios para gestionar el juego del usuario.</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayTragaperras")]
-        public async Task<IActionResult> PlayTragaperras(int userId, int redChips, int yellowChips, int greenChips, int blackChips )
+        public async Task<IActionResult> PlayTragaperras(ManageUserGameRequestDto request)
         {
-            int gameId = 2;
+            request.GameId = 2;
 
-            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
-        
+            var validation = await _validationsManager.ValidateAsync(request);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(request.UserId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta de banco asignada a este usuario");
+            }
+
+            var verificationResult = await _validationsManager.VerifyPlay(request);
+
             if (!verificationResult)
             {
                 return BadRequest("No cumples con los requisitos o has excedido los límites.");
             }
 
             var (victory, resultMessage) = _gameService.PlayTragaperras();
-            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
+            request.Victory = victory;
+            await _gameService.ManageUserGame(request);
 
             return Ok(resultMessage);
         }
@@ -79,19 +107,29 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Permite a un usuario jugar a Blackjack.
         /// </summary>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <param name="redChips">Cantidad de fichas rojas apostadas. Ejemplo: 10</param>
-        /// <param name="yellowChips">Cantidad de fichas amarillas apostadas. Ejemplo: 0</param>
-        /// <param name="greenChips">Cantidad de fichas verdes apostadas. Ejemplo: 0</param>
-        /// <param name="blackChips">Cantidad de fichas negras apostadas. Ejemplo: 0</param>
+        /// <param name="request">DTO que contiene los datos necesarios para gestionar el juego del usuario.</param>
         /// <returns>Un ActionResult que indica el resultado del juego.</returns>
         [HttpPost("PlayBlackjack")]
-        public async Task<IActionResult> PlayBlackjack(int userId, int redChips, int yellowChips, int greenChips, int blackChips)
+        public async Task<IActionResult> PlayBlackjack(ManageUserGameRequestDto request)
         {
 
-            int gameId = 3;
+            request.GameId = 3;
 
-            var verificationResult = await _gameService.VerifyPlay(userId, redChips, yellowChips, greenChips, blackChips, gameId);
+            var validation = await _validationsManager.ValidateAsync(request);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(request.UserId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta de banco asignada a este usuario");
+            }
+
+            var verificationResult = await _validationsManager.VerifyPlay(request);
 
             if (!verificationResult)
             {
@@ -99,7 +137,8 @@ namespace Nelmix.Controllers
             }
 
             var (victory, resultMessage) = _gameService.PlayBlackjack();
-            await _gameService.ManageUserGame(userId, redChips, yellowChips, greenChips, blackChips, victory, gameId);
+            request.Victory = victory;
+            await _gameService.ManageUserGame(request);
 
             return Ok(resultMessage);
         }

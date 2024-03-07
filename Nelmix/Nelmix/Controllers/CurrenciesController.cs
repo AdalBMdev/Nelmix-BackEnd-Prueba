@@ -3,6 +3,8 @@ using Nelmix.Context;
 using Nelmix.Interfaces;
 using Nelmix.Models;
 using Nelmix.Services;
+using Nelmix.Validations;
+using static Nelmix.DTOs.CurrenciesDTO;
 
 namespace Nelmix.Controllers
 {
@@ -11,33 +13,43 @@ namespace Nelmix.Controllers
     {
         
         private readonly ICurrenciesServices _currenciesServices;
+        private readonly IValidationsManager _validationsManager;
 
-        public CurrenciesController(ICurrenciesServices currenciesServices)
+
+        public CurrenciesController(ICurrenciesServices currenciesServices, IValidationsManager validationsManager)
         {
             _currenciesServices = currenciesServices;
+            _validationsManager = validationsManager;
         }
 
 
         /// <summary>
         /// Convierte la moneda de una cuenta a dólares.
         /// </summary>
-        /// <param name="accountId">Identificador de la cuenta de banco. Ejemplo: 1</param>
+        /// <param name="convertCurrencyDollarsRequestDto">Objeto con el Identificador de la cuenta.</param>
         /// <returns>Un ActionResult que indica si la conversión a dólares se realizó con éxito. </returns>
         [HttpPost("convertirMonedaDolares")]
-        public async Task<IActionResult> ConvertCurrencyDollars(int accountId)
+        public async Task<IActionResult> ConvertCurrencyDollars(ConvertCurrencyDollarsRequestDto convertCurrencyDollarsRequestDto)
         {
+            var validation = await _validationsManager.ValidateAsync(convertCurrencyDollarsRequestDto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateBankAccountExistAsync(convertCurrencyDollarsRequestDto.AccountId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta de banco proporcionada");
+            }
+
             try
             {
-                decimal result = await _currenciesServices.ConvertCurrencyDollars(accountId);
+                decimal result = await _currenciesServices.ConvertCurrencyDollars(convertCurrencyDollarsRequestDto);
+                return Ok("La conversión a dólares se realizó con éxito. Saldo: " + result);
 
-                if (result != 0)
-                {
-                    return Ok("La conversión a dólares se realizó con éxito.");
-                }
-                else
-                {
-                    return BadRequest("No se pudo realizar la conversión a dólares.");
-                }
             }
             catch (Exception ex)
             {
@@ -48,25 +60,37 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Compra fichas solo en dólares.
         /// </summary>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <param name="typeFileId">Identificador del tipo de ficha. Ejemplo: 1</param>
-        /// <param name="quantity">Cantidad de fichas a comprar. Ejemplo: 10</param>
+        /// <param name="buyChipsInDollarsRequestDto">Objeto con UserId, TypeFieldId y Quantity.</param>
         /// <returns>Un ActionResult que indica si la compra de fichas en dólares se realizó con éxito.</returns>
         [HttpPost("ComprarFichasEnDolares")]
-        public async Task<IActionResult> BuyChipsInDollars(int userId, int typeFileId, int quantity)
+        public async Task<IActionResult> BuyChipsInDollars(BuyChipsInDollarsRequestDto buyChipsInDollarsRequestDto)
         {
+
+            var validation = await _validationsManager.ValidateAsync(buyChipsInDollarsRequestDto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateUserBankAccountExistAsync(buyChipsInDollarsRequestDto.UserId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta de banco asignada al usuario proporcionada");
+            }
+
+            var result= await _validationsManager.ValidateBankAccountCurrencyIsDolarAndSufficientBalance(buyChipsInDollarsRequestDto);
+
+            if (!result)
+            {
+                return BadRequest("La cuenta bancaria no tiene suficiente saldo en dólares para realizar la compra de fichas");
+            }
+
             try
             {
-                var resultado = await _currenciesServices.BuyChipsInDollars(userId, typeFileId, quantity);
-
-                if (resultado == "Compra de fichas exitosa.")
-                {
-                    return Ok(resultado);
-                }
-                else
-                {
-                    return BadRequest(resultado);
-                }
+                await _currenciesServices.BuyChipsInDollars(buyChipsInDollarsRequestDto);
+                return Ok("Se han comprado las fichas correctamente");
             }
             catch (Exception ex)
             {
@@ -78,17 +102,35 @@ namespace Nelmix.Controllers
         /// <summary>
         /// Realiza el intercambio de fichas por una moneda específica menos dolares.
         /// </summary>
-        /// <param name="userId">Identificador del usuario. Ejemplo: 1</param>
-        /// <param name="typeFileId">Identificador del tipo de ficha. Ejemplo: 1</param>
-        /// <param name="currencyDestinationId">Id de la moneda de destino para el intercambio. Ejemplo: 2</param>
-        /// <param name="quantityFichas">Cantidad de fichas a intercambiar. Ejemplo: 10</param>
+        /// <param name="exchangeChips">Objeto con UserId, TypeFieldId, Quantity y CurrencyDestinationId.</param>
         /// <returns>Un ActionResult que indica si el intercambio de fichas a moneda se realizó con éxito.</returns>
         [HttpPost("CambioFichasAMoneda")]
-        public async Task<IActionResult> ExchangeChipsToCurrency(int userId, int typeFileId, int currencyDestinationId, int quantityFichas)
+        public async Task<IActionResult> ExchangeChipsToCurrency(ExchangeChipsToCurrencyRequestDto exchangeChips)
         {
+            var validation = await _validationsManager.ValidateAsync(exchangeChips);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
+            var accountExist = await _validationsManager.ValidateUserBankAccountExistAsync(exchangeChips.UserId);
+
+            if (!accountExist)
+            {
+                return BadRequest("No existe la cuenta de banco asignada al usuario proporcionada");
+            }
+
+            var chipsSuficient = await _validationsManager.ValidateChipsSuficientAsync(exchangeChips.UserId, exchangeChips.TypeFileId, exchangeChips.Quantity);
+
+            if (!chipsSuficient)
+            {
+                return BadRequest("El usuario no tiene suficientes fichas para realizar el intercambio");
+            }
+
             try
             {
-                var resultado = await _currenciesServices.ExchangeChipsToCurrency(userId, typeFileId, currencyDestinationId, quantityFichas);
+                var resultado = await _currenciesServices.ExchangeChipsToCurrency(exchangeChips);
                 return Ok(resultado);
             }
 
